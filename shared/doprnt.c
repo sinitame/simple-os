@@ -1,13 +1,13 @@
 /*
  * Copyright (c) 1994,1996-1999 University of Utah and the Flux Group.
  * All rights reserved.
- * 
+ *
  * This file is part of the Flux OSKit.  The OSKit is free software, also known
  * as "open source;" you can redistribute it and/or modify it under the terms
  * of the GNU General Public License (GPL), version 2, as published by the Free
  * Software Foundation (FSF).  To explore alternate licensing terms, contact
  * the University of Utah at csl-dist@cs.utah.edu or +1-801-585-3271.
- * 
+ *
  * The OSKit is distributed in the hope that it will be useful, but WITHOUT ANY
  * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
  * FOR A PARTICULAR PURPOSE.  See the GPL for more details.  You should have
@@ -380,7 +380,7 @@ void _doprnt(fmt, args, radix, putc, putc_arg)
 
 		case 'o':
  		    truncate = _doprnt_truncates;
-		    __attribute__((fallthrough));
+		    //__attribute__((fallthrough));
 		case 'O':
 		    base = 8;
 		    goto print_unsigned;
@@ -388,7 +388,7 @@ void _doprnt(fmt, args, radix, putc, putc_arg)
 		case 'd':
 	        case 'i':
  		    truncate = _doprnt_truncates;
-		    __attribute__((fallthrough));
+		    //__attribute__((fallthrough));
 		case 'D':
 		    base = 10;
 		    goto print_signed;
@@ -469,7 +469,7 @@ void _doprnt(fmt, args, radix, putc, putc_arg)
 
 		case 'u':
  		    truncate = _doprnt_truncates;
-		    __attribute__((fallthrough));
+		    //__attribute__((fallthrough));
 		case 'U':
 		    base = 10;
 		    goto print_unsigned;
@@ -484,31 +484,31 @@ void _doprnt(fmt, args, radix, putc, putc_arg)
 		     */
 		    (*putc)(putc_arg, '0');
 		    (*putc)(putc_arg, 'x');
-		    __attribute__((fallthrough));
+		    //__attribute__((fallthrough));
 		case 'x':
  		    truncate = _doprnt_truncates;
-		    __attribute__((fallthrough));
+		    //__attribute__((fallthrough));
 		case 'X':
 		    base = 16;
 		    goto print_unsigned;
 
 		case 'z':
  		    truncate = _doprnt_truncates;
-		    __attribute__((fallthrough));
+		    //__attribute__((fallthrough));
 		case 'Z':
 		    base = 16;
 		    goto print_signed;
 
 		case 'r':
  		    truncate = _doprnt_truncates;
-		    __attribute__((fallthrough));
+		    //__attribute__((fallthrough));
 		case 'R':
 		    base = radix;
 		    goto print_signed;
 
 		case 'n':
  		    truncate = _doprnt_truncates;
-		    __attribute__((fallthrough));
+		    //__attribute__((fallthrough));
 		case 'N':
 		    base = radix;
 		    goto print_unsigned;

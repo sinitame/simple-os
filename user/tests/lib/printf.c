@@ -449,7 +449,7 @@ flags_l:
 
                                 case 'X':
                                         pf->flags |= PRINTF_CAPITAL_X;
-					__attribute__((fallthrough));
+					//__attribute__((fallthrough));
                                 case 'x':
                                         if (pf->modifier == 'h')
                                                 print_hexa(pf, va_arg(ap, int));
@@ -628,5 +628,3 @@ void cons_gets(char *s, unsigned long length)
         cons_echo(1);
 #endif
 }
-
-
