@@ -449,7 +449,9 @@ flags_l:
 
                                 case 'X':
                                         pf->flags |= PRINTF_CAPITAL_X;
-					//__attribute__((fallthrough));
+#if __GNUC__ > 6
+		    __attribute__((fallthrough));
+#endif
                                 case 'x':
                                         if (pf->modifier == 'h')
                                                 print_hexa(pf, va_arg(ap, int));

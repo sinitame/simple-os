@@ -380,7 +380,9 @@ void _doprnt(fmt, args, radix, putc, putc_arg)
 
 		case 'o':
  		    truncate = _doprnt_truncates;
-		    //__attribute__((fallthrough));
+#if __GNUC__ > 6
+		    __attribute__((fallthrough));
+#endif
 		case 'O':
 		    base = 8;
 		    goto print_unsigned;
@@ -388,7 +390,9 @@ void _doprnt(fmt, args, radix, putc, putc_arg)
 		case 'd':
 	        case 'i':
  		    truncate = _doprnt_truncates;
-		    //__attribute__((fallthrough));
+#if __GNUC__ > 6
+		    __attribute__((fallthrough));
+#endif
 		case 'D':
 		    base = 10;
 		    goto print_signed;
@@ -469,7 +473,9 @@ void _doprnt(fmt, args, radix, putc, putc_arg)
 
 		case 'u':
  		    truncate = _doprnt_truncates;
-		    //__attribute__((fallthrough));
+#if __GNUC__ > 6
+		    __attribute__((fallthrough));
+#endif
 		case 'U':
 		    base = 10;
 		    goto print_unsigned;
@@ -484,31 +490,41 @@ void _doprnt(fmt, args, radix, putc, putc_arg)
 		     */
 		    (*putc)(putc_arg, '0');
 		    (*putc)(putc_arg, 'x');
-		    //__attribute__((fallthrough));
+#if __GNUC__ > 6
+		    __attribute__((fallthrough));
+#endif
 		case 'x':
  		    truncate = _doprnt_truncates;
-		    //__attribute__((fallthrough));
+#if __GNUC__ > 6
+		    __attribute__((fallthrough));
+#endif
 		case 'X':
 		    base = 16;
 		    goto print_unsigned;
 
 		case 'z':
  		    truncate = _doprnt_truncates;
-		    //__attribute__((fallthrough));
+#if __GNUC__ > 6
+		    __attribute__((fallthrough));
+#endif
 		case 'Z':
 		    base = 16;
 		    goto print_signed;
 
 		case 'r':
  		    truncate = _doprnt_truncates;
-		    //__attribute__((fallthrough));
+#if __GNUC__ > 6
+		    __attribute__((fallthrough));
+#endif
 		case 'R':
 		    base = radix;
 		    goto print_signed;
 
 		case 'n':
  		    truncate = _doprnt_truncates;
-		    //__attribute__((fallthrough));
+#if __GNUC__ > 6
+		    __attribute__((fallthrough));
+#endif
 		case 'N':
 		    base = radix;
 		    goto print_unsigned;
