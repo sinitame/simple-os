@@ -26,3 +26,9 @@ clean:
 	$(MAKE) clean -C kernel/
 	$(MAKE) clean -C user/
 
+QEMU = /usr/bin/qemu-system-i386
+QEMUOPTS = -cpu pentium -rtc base=localtime -m 64M -gdb tcp::1234 -S -kernel kernel/kernel.bin
+
+
+run:
+	$(QEMU) $(QEMUOPTS)
