@@ -27,8 +27,8 @@ void kernel_start(void)
 	init_idle();
 
 	//Création des 3 processus
-	start(proc1,"proc1",0,0);
-	start(proc2,"proc2",0,0);
+	start(proc1,"proc1",0,3);
+	start(proc2,"proc2",0,3);
 	start(proc3,"proc3",0,0);
 
 	//Lancement de idle (Il va ensuite lancer les autres)
