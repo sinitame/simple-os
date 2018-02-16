@@ -4,6 +4,7 @@
  *
  * Stub for console_putbytes system call.
  */
+
  #include "../shared/console.h"
  #include "../../kernel/cpu.h"
  #include "../shared/inttypes.h"

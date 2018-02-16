@@ -23,4 +23,3 @@ typedef unsigned long long uint64_t;
 #define PRIx32 "x"
 
 #endif
-
