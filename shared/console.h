@@ -6,5 +6,6 @@
  * have to implement it in the kernel and in the user program.
  */
 extern void console_putbytes(const char *s, int len);
+extern void efface_ecran(void);
 
 #endif

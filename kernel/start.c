@@ -1,7 +1,7 @@
 #include "debugger.h"
 #include "cpu.h"
 #include <stdio.h>
-#include "../user/lib/console_putbytes.h"
+#include "../shared/console.h"
 
 int fact(int n)
 {

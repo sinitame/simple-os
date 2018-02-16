@@ -4,12 +4,18 @@
  *
  * Stub for console_putbytes system call.
  */
- #include "../user/lib/console_putbytes.h"
+ #include "../shared/console.h"
  #include "../../kernel/cpu.h"
+ #include "../shared/inttypes.h"
  #include <string.h>
  #include <stdio.h>
 
+ #define MEM_VIDEO 0xB8000
+ #define LIG 24
+ #define COL 79
+
  static uint32_t curseur_lig, curseur_col;
+ void place_curseur(uint32_t lig, uint32_t col);
 
  uint16_t *ptr_mem(uint32_t lig, uint32_t col){
  	return (uint16_t*)(MEM_VIDEO+2*(lig*80+col));
@@ -49,6 +55,16 @@
  	outb(haut, 0x3d5);
  	curseur_lig=lig;
  	curseur_col=col;
+ }
+
+ void defilement(void){
+  memmove(ptr_mem(0,0),ptr_mem(1,0),128);
+  memmove(ptr_mem(1,0),ptr_mem(2,0),(LIG)*COL*2);
+  //place_curseur(curseur_lig+1,0);
+  for(int j=0;j<=COL;j++){
+    ecrit_car(LIG,j,' ');
+  }
+  place_curseur(LIG,0);
  }
 
  void traite_car(char c){
@@ -92,19 +108,7 @@
  	}
  }
 
-
- void defilement(void){
- 	memmove(ptr_mem(0,0),ptr_mem(1,0),128);
- 	memmove(ptr_mem(1,0),ptr_mem(2,0),(LIG)*COL*2);
- 	//place_curseur(curseur_lig+1,0);
- 	for(int j=0;j<=COL;j++){
- 		ecrit_car(LIG,j,' ');
- 	}
- 	place_curseur(LIG,0);
- }
-
-
- void console_putbytes(char *chaine, int32_t taille){
+ void console_putbytes(const char *chaine, int taille){
  	int i;
  	for(i=0;i<taille;i++){
  		traite_car(chaine[i]);
