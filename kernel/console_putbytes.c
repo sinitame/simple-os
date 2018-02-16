@@ -56,6 +56,8 @@
  	outb(haut, 0x3d5);
  	curseur_lig=lig;
  	curseur_col=col;
+
+
  }
 
  void defilement(void){
@@ -103,6 +105,9 @@
  		if (curseur_col==COL && curseur_lig<LIG) {
  			place_curseur(curseur_lig+1,0);
  		}
+        else if(curseur_lig>=LIG && curseur_col==COL){
+            defilement();
+        }
  		else {
  			place_curseur(curseur_lig,curseur_col+1);
  		}
