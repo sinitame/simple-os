@@ -29,9 +29,9 @@ void kernel_start(void)
 	printf("Hello world !");
 	printf("i= %d", i);
 
+	clk();
 	masque_IRQ(0,0);
-
-	init_traitan_IT(32, traitant_IT_32);
+	init_traitant_IT(32, traitant_IT_32);
 	sti();
 
 

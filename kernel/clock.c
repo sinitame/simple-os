@@ -35,15 +35,15 @@ void tic_PIT(void)
   outb(0x20,0x20);
   inb(0x21);
   temps++;
-  if (temps == 50){
+  if (temps == CLOCKFREQ){
       sec++;
       min=(sec==60)?(min+1):min;
       heure=(min==60)?(heure+1):heure;
       min=(min==60)?(0):min;
-      sec=(sec==0)?(0):sec;
+      sec=(sec==60)?(0):sec;
       temps=0;
   }
-  printf("temps: %d", temps);
+//  printf("temps: %d", temps);
   affiche_h();
   //ordonnance();
 
@@ -54,21 +54,14 @@ void masque_IRQ(uint32_t num_IRQ, uint8_t masque){
 	uint8_t masqueAct;
 	uint8_t mask;
 	mask=1;
-	printf("mask= %x \n", mask);
 	mask=mask<<num_IRQ;
-	printf("mask= %x \n", mask);
-	printf("N = %d et donc mask = %x \n", num_IRQ, mask);
 	masqueAct=inb(0x21);
-	printf("masqueAct = %x \n", masqueAct);
 	if (masque==0){
 		mask=~mask;
-		printf("mask= %x \n", mask);
 		masqueAct=masqueAct & mask;
-		printf("1le masque est mtn: %x \n", masqueAct);
 	}
 	else{
 		masqueAct=masqueAct | mask;
-		printf("2le masque est mtn: %x \n", masqueAct);
 	}
 	outb(masqueAct,0x21);
 }
@@ -83,7 +76,7 @@ void clk(void)
   outb((QUARTZ/CLOCKFREQ)>>8,0x40);
 }
 
-void init_traitan_IT(uint32_t num_IT, void (*traitant)(void))
+void init_traitant_IT(uint32_t num_IT, void (*traitant)(void))
 {
   uint32_t *ptr_IT = (uint32_t*)0x1000 + num_IT*2;
   *ptr_IT = (KERNEL_CS<<16 | ((uint32_t)traitant & 0xFFFF)) ;
