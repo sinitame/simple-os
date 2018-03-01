@@ -70,7 +70,6 @@ int chprio(int pid, int newprio);
 int getpid(void);
 
 //Fonctions annexes utiles
-int mon_pid(void);
 char * mon_nom(void);
 void kill_childs(Processus *P);
 void dors(uint32_t nbr_secs);

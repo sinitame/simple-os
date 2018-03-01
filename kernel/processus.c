@@ -88,7 +88,7 @@ uint32_t start(void(*code)(void), char * nom, int taille_pile, int prio){
 void idle(void)
 {
 	for (;;){
-		printf("[%s] pid = %d \n",mon_nom(),mon_pid());
+		printf("[%s] pid = %d \n",mon_nom(),getpid());
 		ordonnancement();
 	}
 }
@@ -104,14 +104,14 @@ void tueur(void){
 void proc1(void)
 {
 	for(;;){
-		printf("[%s] pid = %d , pere : %d\n",mon_nom(),mon_pid(),processus_actif->pere->pid);
+		printf("[%s] pid = %d , pere : %d\n",mon_nom(),getpid(),processus_actif->pere->pid);
 		ordonnancement();
 	}
 }
 
 void proc2(void){
 	for(;;){
-		printf("[%s] pid = %d , pere : %d\n",mon_nom(),mon_pid(),processus_actif->pere->pid);
+		printf("[%s] pid = %d , pere : %d\n",mon_nom(),getpid(),processus_actif->pere->pid);
 		start(proc3,"fils2",0,3);
 		ordonnancement();
 	}
@@ -119,7 +119,7 @@ void proc2(void){
 
 void proc3(void){
 	for(;;){
-		printf("[%s] pid = %d , pere : %d\n",mon_nom(),mon_pid(),processus_actif->pere->pid);
+		printf("[%s] pid = %d , pere : %d\n",mon_nom(),getpid(),processus_actif->pere->pid);
 		kill(1);
 		start(proc4,"fils3",0,3);
 		ordonnancement();
@@ -128,7 +128,7 @@ void proc3(void){
 
 void proc4(void){
 	for(;;){
-		printf("[%s] pid = %d , pere : %d\n",mon_nom(),mon_pid(),processus_actif->pere->pid);
+		printf("[%s] pid = %d , pere : %d\n",mon_nom(),getpid(),processus_actif->pere->pid);
 		kill(2);
 		ordonnancement();
 	}
@@ -221,11 +221,11 @@ void exit1(int retval){
 int kill(int pid){
 	if ((pid >=0) && (pid<NBPROC) && (table_processus[pid] != NULL)){
 		if (processus_actif->pere != NULL){
-			processus_actif->etat = zombie;
+			table_processus[pid]->etat = zombie;
 			printf("pid : %d deviens zombie \n",pid);
 		} else {
-			processus_actif->etat = mort;
-			kill_childs(processus_actif);
+			table_processus[pid]->etat = mort;
+			kill_childs(table_processus[pid]);
 			printf("pid : %d mort \n",pid);
 		}
 		return 0;
@@ -235,7 +235,75 @@ int kill(int pid){
 
 }
 
-int mon_pid(void){
+int waitpid(int pid, int *retvalp){
+
+	if (processus_actif->childs == NULL){
+		return -1;
+	} else {
+		if (pid<0){
+			Liste childs = processus_actif->childs;
+		
+			while(1){
+				while(childs !=NULL){
+					if (table_processus[childs->pid]->etat == zombie){
+						*retvalp = table_processus[childs->pid]->retval;
+						kill_childs(table_processus[childs->pid]);
+						free(table_processus[childs->pid]);
+						table_processus[childs->pid] = NULL;
+						
+						return childs->pid;
+					}
+					childs = childs->suiv;
+				}
+				childs = processus_actif->childs;
+			}
+		} else {
+			Liste childs = processus_actif->childs;
+			while(childs!=NULL){
+				if(childs->pid == pid){
+					while(1){
+						if(table_processus[childs->pid]->etat == zombie){
+							*retvalp = table_processus[childs->pid]->retval;
+							kill_childs(table_processus[childs->pid]);
+							free(table_processus[childs->pid]);
+							table_processus[childs->pid] = NULL;
+						
+							return childs->pid;
+						}
+					}
+				}
+				childs = childs->suiv;
+			}
+			return -1;
+		}
+			
+	}
+}
+
+
+
+
+int getprio(int pid){
+	if (pid<0 || pid>=NBPROC || table_processus[pid] == NULL){
+		return -1;
+	} else {
+		return table_processus[pid]->prio;
+	}
+}
+
+
+int chprio(int pid, int newprio){
+	if (pid<0 || pid>=NBPROC || table_processus[pid] == NULL){
+		return -1;
+	} else {
+		int ancienne_prio = table_processus[pid]->prio;
+		table_processus[pid]->prio = newprio;
+		//TODO : Supprimer le processus des files d'attente et le remettre avec sa bonne priorité
+		return ancienne_prio;
+	}
+}
+
+int getpid(void){
 	return processus_actif->pid;
 }
 
