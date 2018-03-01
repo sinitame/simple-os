@@ -6,32 +6,25 @@
 #define NBQUEUE 1
 
 struct file_priorite {
-  int32_t val;
-  int32_t prio;
+  int val;
+  int prio;
   link chaine;
 };
 typedef struct file_priorite File_priorite;
 
 struct message_queue {
   link blocked_producers;
-  int32_t nb_b_p;
+  int nb_b_p;
   link blocked_consumers;
-  int32_t nb_b_c;
-  int32_t queue_capacity;
-  int32_t nb_msg;
+  int nb_b_c;
+  int prio_c;
+  int queue_capacity;
+  int nb_msg;
   link messages;
 };
 typedef struct message_queue Message_queue;
-  /*pthread_mutex_t mutex;
-  pthread_cond_t fp;
-  pthread_cond_t fc;
-  int32_t nb_b_p;
-  int32_t nb_b_c;
-  int32_t queue_capacity;
-  int32_t nb_msg;
-  link messages;*/
 
-extern int32_t nb_queues;
+extern int nb_queues;
 extern Message_queue *tab_message_queues[NBQUEUE];
 
 int pcount(int fid, int *count);
