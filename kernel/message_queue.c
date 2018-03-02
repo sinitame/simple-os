@@ -145,10 +145,10 @@ int preceive(int fid,int *message) {
 	}*/
       table_processus[proc->val]->etat=activable;
       ordonnancement();
+    }
   }
 
   return 0;
-  }
 }
 
 int preset(int fid) {
