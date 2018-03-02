@@ -72,6 +72,23 @@ int pdelete(int fid) {
     queue_del(curr_element, chaine);
     free(curr_element);
   }
+  //Parcourir la file des processus consommateurs
+  queue_for_each(curr_element, &tab_message_queues[fid]->blocked_consumers, File_priorite, chaine) {
+    //Supprimer les élements de la file
+    queue_del(curr_element, chaine);
+    //Libérer les processus consommateurs
+    table_processus[curr_element->val]->etat=activable;
+    free(curr_element);
+  }
+  //Parcourir la file des processus producteurs
+  queue_for_each(curr_element, &tab_message_queues[fid]->blocked_producers, File_priorite, chaine) {
+    //Supprimer les élements de la file
+    queue_del(curr_element, chaine);
+    //Libérer les processus producteurs
+    table_processus[curr_element->val]->etat=activable;
+    free(curr_element);
+  }
+
   free(tab_message_queues[fid]);
   nb_queues--;
   return 0;
@@ -89,7 +106,7 @@ int preceive(int fid,int *message) {
     nv_c=malloc(sizeof(File_priorite));
     nv_c->val=getpid();
     //tester si la liste des consommateurs est vide
-    if (queue_empty(&tab_message_queues[fid]->messages)!=0) {
+    if (queue_empty(&tab_message_queues[fid]->blocked_consumers)!=0) {
       nv_c->prio=0;
     }
     else {
@@ -120,12 +137,16 @@ int preceive(int fid,int *message) {
       File_priorite *proc;
       proc=queue_bottom(&tab_message_queues[fid]->blocked_producers, File_priorite, chaine);
       queue_del(proc, chaine);
-      //si le processus bloqué est plus prioritaire
+      /*//si le processus bloqué est plus prioritaire
       if (getprio(proc->val)>getprio(getpid())) {
-	       table_processus[proc->val]->etat=activable;
-	       ordonnancement();
-      }
-    }
+
+	table_processus[proc->val]->etat=activable;
+	ordonnancement();
+	}*/
+      table_processus[proc->val]->etat=activable;
+      ordonnancement();
+  }
+
   return 0;
   }
 }

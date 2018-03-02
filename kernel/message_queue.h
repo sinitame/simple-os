@@ -14,11 +14,15 @@ typedef struct file_priorite File_priorite;
 
 struct message_queue {
   link blocked_producers;
+  //nombre des processus producteurs bloqués
   int nb_b_p;
   link blocked_consumers;
+  //nombre des processus consomatteurs bloqués
   int nb_b_c;
   int prio_c;
+  //nombre de messages maximal dans la file
   int queue_capacity;
+  //nombre de messages dans la file
   int nb_msg;
   link messages;
 };
