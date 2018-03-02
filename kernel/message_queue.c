@@ -173,7 +173,7 @@ int psend(int fid, int message){
     }
   }
   // Si la file de message est pleine
-  if (tab_message_queues[fid] -> nb_msg >= tab_message_queues[fil]-> queue_capacity){
+  if (tab_message_queues[fid] -> nb_msg >= tab_message_queues[fid]-> queue_capacity){
     // On enregistre le pid de ce processus
     tab_message_queues[fid]->nb_b_c++;
     File_priorite *nv_c;
