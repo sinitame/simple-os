@@ -74,7 +74,7 @@ int pdelete(int fid) {
   }
   free(tab_message_queues[fid]);
   nb_queues--;
-  return 0; 
+  return 0;
 }
 
 int preceive(int fid,int *message) {
@@ -122,17 +122,22 @@ int preceive(int fid,int *message) {
       queue_del(proc, chaine);
       //si le processus bloqué est plus prioritaire
       if (getprio(proc->val)>getprio(getpid())) {
-	table_processus[proc->val]->etat=activable;
-	ordonnancement();
+	       table_processus[proc->val]->etat=activable;
+	       ordonnancement();
       }
-  }
+    }
   return 0;
+  }
 }
 
 int preset(int fid) {
 }
 
 int psend(int fid, int message){
+  if (fid>=NBQUEUE) {
+    return -1;
+  }
+  // Si la file de messages n'est pas pleine
   if (tab_message_queues[fid]->nb_msg<tab_message_queues[fid]->queue_capacity) {
     tab_message_queues[fid]->nb_msg++;
     File_priorite *nv_msg;
@@ -141,5 +146,34 @@ int psend(int fid, int message){
     nv_msg->prio=0;
     INIT_LIST_HEAD(&(nv_msg->chaine));
     queue_add(nv_msg, &(tab_message_queues[fid]->messages), File_priorite, chaine, prio);
+    // S'il n'y avait pas de messages dans la file, on appelle le processus le plus prioritaire
+    if(tab_message_queues[fid]-> nb_msg == 0){
+      ordonnancement();
+    }
   }
+  // Si la file de message est pleine
+  if (tab_message_queues[fid] -> nb_msg >= tab_message_queues[fil]-> queue_capacity){
+    // On enregistre le pid de ce processus
+    tab_message_queues[fid]->nb_b_c++;
+    File_priorite *nv_c;
+    nv_c=malloc(sizeof(File_priorite));
+    nv_c->val=getpid();
+    // Si la file des producteurs bloqués est vide
+    if (queue_empty(&tab_message_queues[fid]->messages)!=0) {
+      nv_c->prio=0;
+    }
+    // Sinon on récupere les dernier processus bloqué et on met à jour sa priorité
+    else {
+      File_priorite *proc;
+      proc=queue_top(&tab_message_queues[fid]->blocked_consumers, File_priorite, chaine);
+      nv_c->prio=proc->prio++;
+    }
+    INIT_LIST_HEAD(&(nv_c->chaine));
+    //Ajout de ce processus dans la liste des consommateurs bloqués
+    queue_add(nv_c, &(tab_message_queues[fid]->blocked_consumers), File_priorite, chaine, prio);
+    // On met le processus en attente
+    table_processus[getpid()]->etat=wait_io;
+    ordonnancement();
+  }
+  return 0;
 }
