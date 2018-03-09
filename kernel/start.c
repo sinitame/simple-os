@@ -5,6 +5,7 @@
 #include <inttypes.h>
 #include <start.h>
 #include "../user/lib/clock.h"
+#include "processus.h"
 
 int fact(int n)
 {
@@ -17,17 +18,23 @@ int fact(int n)
 
 void kernel_start(void)
 {
-	int i;
-//	call_debugger();
 
-	i = 10;
-
-	i = fact(i);
 
 	efface_ecran();
+	printf("Début tests changement de processus !\n");
 
-	printf("Hello world !");
-	printf("i= %d", i);
+	//Initialisation de idle
+	init_idle();
+
+	//Création des 3 processus
+	start(proc1,"proc1",0,3);
+	start(proc2,"proc2",0,3);
+	start(proc3,"proc3",0,0);
+	start(proc4,"proc4",0,2);
+
+
+	//Lancement de idle (Il va ensuite lancer les autres)
+	idle();
 
 	clk();
 	masque_IRQ(0,0);
