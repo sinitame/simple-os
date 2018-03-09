@@ -19,6 +19,10 @@ int fact(int n)
 void kernel_start(void)
 {
 
+	clk();
+	masque_IRQ(0,0);
+	init_traitant_IT(32, traitant_IT_32);
+
 
 	efface_ecran();
 	printf("Début tests changement de processus !\n");
@@ -32,14 +36,9 @@ void kernel_start(void)
 	start(proc3,"proc3",0,0);
 	start(proc4,"proc4",0,2);
 
-
+	sti();
 	//Lancement de idle (Il va ensuite lancer les autres)
 	idle();
-
-	clk();
-	masque_IRQ(0,0);
-	init_traitant_IT(32, traitant_IT_32);
-	sti();
 
 
 	affiche_h();
