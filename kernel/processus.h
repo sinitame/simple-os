@@ -2,7 +2,7 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include "../shared/queue.h"
-
+#include "../user/lib/clock.h"
 
 #define NBPROC 10
 #define MAXPRIO 256
@@ -28,7 +28,7 @@ struct Processus {
 	enum etats etat;
 	int registres[5];
 	int pile[512];
-	int reveil;
+	uint32_t reveil;
 	link lien;
 };
 
@@ -45,7 +45,7 @@ void init(int pid, char* nom, int etat,int prio, void (*processus)(void));
 
 /*
 /Fonction de creation d'un processus.
-/TODO : jouter l'argument paramètre 
+/TODO : jouter l'argument paramètre
 */
 uint32_t start(void(*code)(void), char * nom, int taille_pile, int prio);
 
