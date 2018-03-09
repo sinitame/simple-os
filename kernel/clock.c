@@ -36,13 +36,12 @@ void tic_PIT(void)
   outb(0x20,0x20);
   inb(0x21);
   temps++;
-  if (temps == CLOCKFREQ){
+  if (temps%CLOCKFREQ == 0){
       sec++;
       min=(sec==60)?(min+1):min;
       heure=(min==60)?(heure+1):heure;
       min=(min==60)?(0):min;
       sec=(sec==60)?(0):sec;
-      temps=0;
   }
 //  printf("temps: %d", temps);
   affiche_h();

@@ -104,7 +104,12 @@ void tueur(void){
 
 void proc1(void)
 {
+	unsigned long q;
+	unsigned long t;
 	for(;;){
+		clock_settings(&q, &t);
+		printf("quartz : %lu , ticks : %lu\n", q,t);
+		printf("%u \n",current_clock());
 		printf("[%s] pid = %d .  %u \n",mon_nom(),getpid(), table_processus[getpid()]->reveil);
 		dors(1);
 	}
