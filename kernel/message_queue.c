@@ -1,7 +1,8 @@
 #include <stdio.h>
-#include <stdlib.h>
+#include <string.h>
 #include "message_queue.h"
-#include "../shared/malloc.c"
+#include "mem.h"
+#include "processus.h"
 
 int nb_queues=0;
 Message_queue *tab_message_queues[NBQUEUE]={NULL};
@@ -44,7 +45,7 @@ int pcreate(int count) {
       fid++;
     }
   }
-  tab_message_queues[fid] = malloc(sizeof(Message_queue));
+  tab_message_queues[fid] = mem_alloc(sizeof(Message_queue));
   tab_message_queues[fid]->nb_msg=0;
   tab_message_queues[fid]->nb_b_c=0;
   tab_message_queues[fid]->nb_b_p=0;
@@ -74,7 +75,7 @@ int pdelete(int fid) {
   queue_for_each(curr_element, &tab_message_queues[fid]->messages, File_priorite, chaine) {
     //supprimer tous les messages dans la file
     queue_del(curr_element, chaine);
-    free(curr_element);
+    mem_free(curr_element, sizeof(File_priorite));
   }
   //Parcourir la file des processus consommateurs
   queue_for_each(curr_element, &tab_message_queues[fid]->blocked_consumers, File_priorite, chaine) {
@@ -82,7 +83,7 @@ int pdelete(int fid) {
     queue_del(curr_element, chaine);
     //Libérer les processus consommateurs
     table_processus[curr_element->val]->etat=activable;
-    free(curr_element);
+    mem_free(curr_element,sizeof(File_priorite));
   }
   //Parcourir la file des processus producteurs
   queue_for_each(curr_element, &tab_message_queues[fid]->blocked_producers, File_priorite, chaine) {
@@ -90,9 +91,9 @@ int pdelete(int fid) {
     queue_del(curr_element, chaine);
     //Libérer les processus producteurs
     table_processus[curr_element->val]->etat=activable;
-    free(curr_element);
+    mem_free(curr_element,sizeof(File_priorite));
   }
-  free(tab_message_queues[fid]);
+  mem_free(tab_message_queues[fid], sizeof(Message_queue));
   nb_queues--;
   return 0;
 }
@@ -109,7 +110,7 @@ int preceive(int fid,int *message) {
   if (queue_empty(&tab_message_queues[fid]->messages)) {
     // On enregistre le pid de ce processus dans la file des consommateurs
     File_priorite *nv_c;
-    nv_c=malloc(sizeof(File_priorite));
+    nv_c=mem_alloc(sizeof(File_priorite));
     nv_c->val=getpid();
     nv_c->prio=getprio(getpid());
     INIT_LIST_HEAD(&(nv_c->chaine));
@@ -131,7 +132,7 @@ int preceive(int fid,int *message) {
     if (message!=NULL) {
       *message=msg->val;
     }
-    free(msg);
+    mem_free(msg, sizeof(File_priorite));
     //On décrément le nombre de messages dans la file
     tab_message_queues[fid]->nb_msg--;
     //s'il existe des processus producteurs bloqués
@@ -161,21 +162,21 @@ int preset(int fid) {
   queue_for_each(curr_element, &tab_message_queues[fid]->messages, File_priorite, chaine) {
     //supprimer tous les messages dans la file
     queue_del(curr_element, chaine);
-    free(curr_element);
+    mem_free(curr_element, sizeof(File_priorite));
   }
   //Parcourir la file des processus consommateurs
   queue_for_each(curr_element, &tab_message_queues[fid]->blocked_consumers, File_priorite, chaine) {
     //Supprimer les élements de la file
     queue_del(curr_element, chaine);
     table_processus[curr_element->val]->etat=activable;
-    free(curr_element);
+    mem_free(curr_element, sizeof(File_priorite));
   }
   //Parcourir la file des processus producteurs
   queue_for_each(curr_element, &tab_message_queues[fid]->blocked_producers, File_priorite, chaine) {
     //Supprimer les élements de la file
     queue_del(curr_element, chaine);
     table_processus[curr_element->val]->etat=activable;
-    free(curr_element);
+    mem_free(curr_element, sizeof(File_priorite));
   }
   return 0;
 }
@@ -191,7 +192,7 @@ int psend(int fid, int message){
   // Si la file de messages n'est pas pleine
   if (tab_message_queues[fid]->nb_msg<tab_message_queues[fid]->queue_capacity) {
     File_priorite *nv_msg;
-    nv_msg=malloc(sizeof(File_priorite));
+    nv_msg=mem_alloc(sizeof(File_priorite));
     nv_msg->val=message;
     if (queue_empty(&tab_message_queues[fid]->messages)!=0) {
       nv_msg->prio=0;
@@ -221,7 +222,7 @@ int psend(int fid, int message){
     // On enregistre le pid de ce processus
     tab_message_queues[fid]->nb_b_p++;
     File_priorite *nv_c;
-    nv_c=malloc(sizeof(File_priorite));
+    nv_c=mem_alloc(sizeof(File_priorite));
     nv_c->val=getpid();
     nv_c->prio=getprio(getpid());
     INIT_LIST_HEAD(&(nv_c->chaine));
