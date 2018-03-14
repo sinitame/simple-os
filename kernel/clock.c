@@ -83,9 +83,7 @@ void init_traitant_IT(uint32_t num_IT, void (*traitant)(void))
   *(ptr_IT+1) = (((uint32_t)traitant & 0xFFFF0000)| 0x8E00);
 }
 
-void wait_clock(unsigned long clock){
-  dors(clock);
-}
+
 
 void clock_settings(unsigned long *quartz, unsigned long *ticks){
   *quartz = QUARTZ;

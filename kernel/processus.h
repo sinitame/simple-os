@@ -72,4 +72,4 @@ int getpid(void);
 //Fonctions annexes utiles
 char * mon_nom(void);
 void kill_childs(Processus *P);
-void dors(uint32_t nbr_secs);
+void wait_clock(uint32_t nbr_secs);

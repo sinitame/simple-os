@@ -108,17 +108,15 @@ void proc1(void)
 	unsigned long t;
 	for(;;){
 		clock_settings(&q, &t);
-		printf("quartz : %lu , ticks : %lu\n", q,t);
-		printf("%u \n",current_clock());
 		printf("[%s] pid = %d .  %u \n",mon_nom(),getpid(), table_processus[getpid()]->reveil);
-		dors(1);
+		wait_clock(1);
 	}
 }
 
 void proc2(void){
 	for(;;){
 		printf("[%s] pid = %d -  %u \n",mon_nom(),getpid(), table_processus[getpid()]->reveil);
-		dors(2);
+		wait_clock(2);
 	}
 }
 
@@ -126,7 +124,7 @@ void proc3(void){
 	for(;;){
 		for(;;){
 			printf("[%s] pid = %d +  %u \n",mon_nom(),getpid(), table_processus[getpid()]->reveil);
-			dors(5);
+			wait_clock(5);
 		}
 	}
 }
@@ -134,7 +132,7 @@ void proc3(void){
 void proc4(void){
 	for(;;){
 		printf("[%s] pid = %d *  %u \n",mon_nom(),getpid(), table_processus[getpid()]->reveil);
-		dors(10);
+		wait_clock(10);
 	}
 }
 
@@ -336,7 +334,7 @@ void kill_childs(Processus *P){
 	}
 }
 
-void dors(uint32_t nbr_secs){
+void wait_clock(uint32_t nbr_secs){
 	processus_actif->reveil += nbr_secs;
 	processus_actif->etat = endormi;
 	ordonnancement();
