@@ -9,6 +9,7 @@
 #include <segment.h>
 #include "../kernel/processus.h"
 #include "../user/lib/console_putbytes.h"
+#include "processus.h"
 
 #define QUARTZ 0x1234DD
 #define CLOCKFREQ 50
@@ -45,7 +46,7 @@ void tic_PIT(void)
   }
 //  printf("temps: %d", temps);
   affiche_h();
-  //ordonnance();
+  // ordonnance();
 
 }
 

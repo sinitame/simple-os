@@ -1,3 +1,6 @@
+#ifndef __PROCESSUS_H__
+#define __PROCESSUS_H__
+
 #include <cpu.h>
 #include <inttypes.h>
 #include <stdio.h>
@@ -73,3 +76,5 @@ int getpid(void);
 char * mon_nom(void);
 void kill_childs(Processus *P);
 void wait_clock(uint32_t nbr_secs);
+
+#endif
