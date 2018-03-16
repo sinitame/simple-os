@@ -1,6 +1,4 @@
-#include "../kernel/cpu.h"
-#include "../shared/inttypes.h"
-#include <stdbool.h>
+#include <inttypes.h>
 
 
 #ifndef __CLOCK_H__
@@ -15,5 +13,8 @@ void clk(void);
 void init_traitant_IT(uint32_t num_IT, void (*traitant)(void));
 extern uint32_t temps;
 extern uint32_t sec;
+
+void clock_settings(unsigned long *quartz, unsigned long *ticks);
+uint32_t current_clock();
 
 #endif

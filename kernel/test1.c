@@ -6,19 +6,21 @@
  * Attente de terminaison (cas fils avant pere et cas pere avant fils)
  ******************************************************************************/
 
-#include "test1.h"
+#include "stdio.h"
+#include "processus.h"
+#define DUMMY_VAL 78
 
-int dummy2(void *arg)
+void dummy2(void)
 {
         printf(" 5");
-        assert((int) arg == DUMMY_VAL + 1);
-        return 4;
+        // assert((int) arg == DUMMY_VAL + 1);
+        // return 4;
 }
 
-int dummy1(void *arg) {
+void dummy1(void) {
         printf("1");
-        assert((int) arg == DUMMY_VAL);
-        return 3;
+        // assert((int) arg == DUMMY_VAL);
+        // return 3;
 }
 
 
