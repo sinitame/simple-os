@@ -7,7 +7,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <segment.h>
+#include "../kernel/processus.h"
 #include "../user/lib/console_putbytes.h"
+#include "processus.h"
 
 #define QUARTZ 0x1234DD
 #define CLOCKFREQ 50
@@ -35,17 +37,16 @@ void tic_PIT(void)
   outb(0x20,0x20);
   inb(0x21);
   temps++;
-  if (temps == CLOCKFREQ){
+  if (temps%CLOCKFREQ == 0){
       sec++;
       min=(sec==60)?(min+1):min;
       heure=(min==60)?(heure+1):heure;
       min=(min==60)?(0):min;
       sec=(sec==60)?(0):sec;
-      temps=0;
   }
 //  printf("temps: %d", temps);
   affiche_h();
-  //ordonnance();
+  // ordonnance();
 
 }
 
@@ -81,4 +82,15 @@ void init_traitant_IT(uint32_t num_IT, void (*traitant)(void))
   uint32_t *ptr_IT = (uint32_t*)0x1000 + num_IT*2;
   *ptr_IT = (KERNEL_CS<<16 | ((uint32_t)traitant & 0xFFFF)) ;
   *(ptr_IT+1) = (((uint32_t)traitant & 0xFFFF0000)| 0x8E00);
+}
+
+
+
+void clock_settings(unsigned long *quartz, unsigned long *ticks){
+  *quartz = QUARTZ;
+  *ticks = CLOCKFREQ;
+}
+
+uint32_t current_clock(){
+  return temps;
 }
