@@ -58,7 +58,7 @@ void init(int pid, const char* nom, int etat,int prio, int (*processus)(void*), 
 	P->etat = etat;
 	P->registres[esp] = (uint32_t)((P->pile)+509);
 	P->pile[509] = (uint32_t)processus;
-	P->pile[510] = (uint32_t)exit1;
+	P->pile[510] = (uint32_t)exit;
 	P->pile[511] = (uint32_t)arg;
 	P->reveil = 0;
 
@@ -113,7 +113,7 @@ int proc1(void* p)
 		printf("[%s] pid = %d .  %u \n",mon_nom(),getpid(), table_processus[getpid()]->reveil);
 		ordonnancement();
 	}
-	exit1(getpid());
+	exit(getpid());
 	return 0;
 }
 
@@ -123,7 +123,7 @@ int proc2(void* p){
 		printf("[%s] pid = %d -  %u \n",mon_nom(),getpid(), table_processus[getpid()]->reveil);
 		ordonnancement();
 	}
-	exit1(getpid());
+	exit(getpid());
 	return 0;
 }
 
@@ -133,7 +133,7 @@ int proc3(void* p){
 			printf("[%s] pid = %d +  %u \n",mon_nom(),getpid(), table_processus[getpid()]->reveil);
 			ordonnancement();
 		}
-	exit1(getpid());
+	exit(getpid());
 	return 0;
 }
 
@@ -143,7 +143,7 @@ int proc4(void* p){
 		printf("[%s] pid = %d *  %u \n",mon_nom(),getpid(), table_processus[getpid()]->reveil);
 		ordonnancement();
 	}
-	exit1(getpid());
+	exit(getpid());
 	return 0;
 }
 
@@ -222,7 +222,7 @@ void ordonnancement(void){
 }
 
 
-void exit1(int retval){
+void exit(int retval){
 	if (processus_actif->pere != NULL){
 		processus_actif->etat = zombie;
 		processus_actif->retval = retval;
@@ -232,6 +232,7 @@ void exit1(int retval){
 	}
 	printf("terminaison du processus: %d \n", getpid());
 	ordonnancement();
+	while(1) {}
 }
 
 
