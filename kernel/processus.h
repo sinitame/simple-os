@@ -44,21 +44,19 @@ Processus *processus_actif;
 void init_idle(void);
 
 //Fonction d'initialisation d'un processus
-void init(int pid, char* nom, int etat,int prio, void (*processus)(void));
-
+void init(int pid, const char* nom, int etat,int prio, int (*processus)(void*), void *arg);
 /*
 /Fonction de creation d'un processus.
 /TODO : jouter l'argument paramètre
 */
-uint32_t start(void(*code)(void), char * nom, int taille_pile, int prio);
-
+uint32_t start(int(*code)(void*), unsigned long taille_pile, int prio, const char * nom, void *arg);
 //Fonction crées pour les tests
 void idle(void);
 void tueur(void);
-void proc1(void);
-void proc2(void);
-void proc3(void);
-void proc4(void);
+int proc1(void* p);
+int proc2(void* p);
+int proc3(void* p);
+int proc4(void* p);
 
 //Fonctions gérant l'ordonnancement des processus
 void ordonnancement_simple(void);

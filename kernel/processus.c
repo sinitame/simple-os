@@ -45,7 +45,7 @@ void init_idle(void){
 
 }
 
-void init(int pid, char* nom, int etat,int prio, void (*processus)(void)){
+void init(int pid, const char* nom, int etat,int prio, int (*processus)(void*), void *arg){
 
 	//Création du nouveau processus
 	table_processus[pid] = malloc(sizeof(Processus));
@@ -56,8 +56,10 @@ void init(int pid, char* nom, int etat,int prio, void (*processus)(void)){
 	P->childs = NULL;
 	strcpy(P->nom,nom);
 	P->etat = etat;
-	P->registres[esp] = (uint32_t)((P->pile)+511);
-	P->pile[511] = (uint32_t)processus;
+	P->registres[esp] = (uint32_t)((P->pile)+509);
+	P->pile[509] = (uint32_t)processus;
+	P->pile[510] = (uint32_t)exit1;
+	P->pile[511] = (uint32_t)arg;
 	P->reveil = 0;
 
 	//Ajout du processus à la file des processus
@@ -70,10 +72,10 @@ void init(int pid, char* nom, int etat,int prio, void (*processus)(void)){
 	processus_actif->childs = new_child;
 }
 
-uint32_t start(void(*code)(void), char * nom, int taille_pile, int prio){
+uint32_t start(int(*code)(void*), unsigned long taille_pile, int prio, const char * nom, void *arg){
 	for (int futur_pid=0; futur_pid<NBPROC; futur_pid++){
 		if (table_processus[futur_pid] == NULL){
-			init(futur_pid,nom,activable,prio,code);
+			init(futur_pid,nom,activable,prio,code, arg);
 			printf("pid cree :%d \n", futur_pid);
 			return futur_pid;
 		}
@@ -102,38 +104,45 @@ void tueur(void){
 }
 
 
-void proc1(void)
+int proc1(void* p)
 {
-	unsigned long q;
-	unsigned long t;
-	for(;;){
-		clock_settings(&q, &t);
+	(void)p;
+	for(int i=0;i<1;i++){
 		printf("[%s] pid = %d .  %u \n",mon_nom(),getpid(), table_processus[getpid()]->reveil);
-		wait_clock(1);
+		ordonnancement();
 	}
+	exit1(getpid());
+	return 0;
 }
 
-void proc2(void){
-	for(;;){
+int proc2(void* p){
+	(void)p;
+	for(int i=0;i<2;i++){
 		printf("[%s] pid = %d -  %u \n",mon_nom(),getpid(), table_processus[getpid()]->reveil);
-		wait_clock(2);
+		ordonnancement();
 	}
+	exit1(getpid());
+	return 0;
 }
 
-void proc3(void){
-	for(;;){
-		for(;;){
+int proc3(void* p){
+	(void)p;
+	for(int i=0;i<3;i++){
 			printf("[%s] pid = %d +  %u \n",mon_nom(),getpid(), table_processus[getpid()]->reveil);
-			wait_clock(5);
+			ordonnancement();
 		}
-	}
+	exit1(getpid());
+	return 0;
 }
 
-void proc4(void){
-	for(;;){
+int proc4(void* p){
+	(void)p;
+	for(int i=0;i<4;i++){
 		printf("[%s] pid = %d *  %u \n",mon_nom(),getpid(), table_processus[getpid()]->reveil);
-		wait_clock(10);
+		ordonnancement();
 	}
+	exit1(getpid());
+	return 0;
 }
 
 void ordonnancement_simple(){
@@ -219,6 +228,7 @@ void exit1(int retval){
 		processus_actif->etat = mort;
 		kill_childs(processus_actif);
 	}
+	printf("terminaison du processus: %d \n", getpid());
 	ordonnancement();
 }
 
