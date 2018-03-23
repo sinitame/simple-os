@@ -90,9 +90,11 @@ uint32_t start(int(*code)(void*), unsigned long taille_pile, int prio, const cha
 
 void idle(void)
 {
+
 	for (;;){
-		//printf("[%s] pid = %d \n",mon_nom(),getpid());
-		ordonnancement();
+		sti();
+		hlt();
+		cli();
 	}
 }
 

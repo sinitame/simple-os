@@ -46,8 +46,7 @@ void tic_PIT(void)
   }
 //  printf("temps: %d", temps);
   affiche_h();
-  // ordonnance();
-
+  ordonnancement();
 }
 
 

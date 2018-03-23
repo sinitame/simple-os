@@ -28,7 +28,6 @@ void kernel_start(void)
 	init_idle();
 	start(dummy1, 4000, 192, "proc1", (void*)DUMMY_VAL);
 
-	sti();
 
 	idle();
 
