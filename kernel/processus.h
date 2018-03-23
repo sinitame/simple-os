@@ -63,7 +63,7 @@ void ordonnancement_simple(void);
 void ordonnancement(void);
 
 //Primitives de gestion des processus comme spécifié dans la spec
-void exit1(int retval);
+void exit(int retval);
 int kill(int pid);
 int waitpid(int pid, int *retvalp);
 int getprio(int pid);
