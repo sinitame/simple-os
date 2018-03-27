@@ -9,7 +9,7 @@
 extern void ctx_sw(int*,int*);
 
 void init_idle(void){
-	
+
 	/* Initialisation de la table et de la file des processus
 	* Le premier (indice 0 est idle), le dernier est le processus tueur (indice NBPROC)
 	* Le tableau des donc de taille NBPROC+1
@@ -17,10 +17,10 @@ void init_idle(void){
 	for (int i = 0; i<=NBPROC; i++){
 		table_processus[i] = NULL;
 	}
-	
+
 	//Initialisation de la file de processus
 	INIT_LIST_HEAD(&file_processus);
-	
+
 
 	//Initialisation de idle
 	table_processus[0] = malloc(sizeof(Processus));
@@ -41,12 +41,12 @@ void init_idle(void){
 	Ptueur->etat = activable;
 	Ptueur->registres[esp] = (uint32_t)((Ptueur->pile)+511);
 	Ptueur->pile[511] = (uint32_t)tueur;
-	
+
 
 }
 
-void init(int pid, char* nom, int etat,int prio, void (*processus)(void)){
-	
+void init(int pid, const char* nom, int etat,int prio, int (*processus)(void*), void *arg){
+
 	//Création du nouveau processus
 	table_processus[pid] = malloc(sizeof(Processus));
 	Processus *P = table_processus[pid];
@@ -56,8 +56,11 @@ void init(int pid, char* nom, int etat,int prio, void (*processus)(void)){
 	P->childs = NULL;
 	strcpy(P->nom,nom);
 	P->etat = etat;
-	P->registres[esp] = (uint32_t)((P->pile)+511);
-	P->pile[511] = (uint32_t)processus;
+	P->registres[esp] = (uint32_t)((P->pile)+509);
+	P->pile[509] = (uint32_t)processus;
+	P->pile[510] = (uint32_t)exit;
+	P->pile[511] = (uint32_t)arg;
+	P->reveil = 0;
 
 	//Ajout du processus à la file des processus
 	queue_add(P,&file_processus,Processus,lien,prio);
@@ -66,30 +69,32 @@ void init(int pid, char* nom, int etat,int prio, void (*processus)(void)){
 	Liste new_child = malloc(sizeof(*new_child));
 	new_child->pid = pid;
 	new_child->suiv = processus_actif->childs;
-	processus_actif->childs = new_child; 
+	processus_actif->childs = new_child;
 }
 
-uint32_t start(void(*code)(void), char * nom, int taille_pile, int prio){
+uint32_t start(int(*code)(void*), unsigned long taille_pile, int prio, const char * nom, void *arg){
 	for (int futur_pid=0; futur_pid<NBPROC; futur_pid++){
 		if (table_processus[futur_pid] == NULL){
-			init(futur_pid,nom,activable,prio,code);
+			init(futur_pid,nom,activable,prio,code, arg);
 			printf("pid cree :%d \n", futur_pid);
 			return futur_pid;
 		}
 	}
-	
-	
+
+
 	taille_pile+=1;
 	return -1;
 }
-	
+
 
 
 void idle(void)
 {
+
 	for (;;){
-		printf("[%s] pid = %d \n",mon_nom(),getpid());
-		ordonnancement();
+		sti();
+		hlt();
+		cli();
 	}
 }
 
@@ -99,39 +104,47 @@ void tueur(void){
 	free(processus_actif);
 	ordonnancement();
 }
-	
 
-void proc1(void)
+
+int proc1(void* p)
 {
-	for(;;){
-		printf("[%s] pid = %d , pere : %d\n",mon_nom(),getpid(),processus_actif->pere->pid);
+	(void)p;
+	for(int i=0;i<1;i++){
+		printf("[%s] pid = %d .  %u \n",mon_nom(),getpid(), table_processus[getpid()]->reveil);
 		ordonnancement();
 	}
+	exit(getpid());
+	return 0;
 }
 
-void proc2(void){
-	for(;;){
-		printf("[%s] pid = %d , pere : %d\n",mon_nom(),getpid(),processus_actif->pere->pid);
-		start(proc3,"fils2",0,3);
+int proc2(void* p){
+	(void)p;
+	for(int i=0;i<2;i++){
+		printf("[%s] pid = %d -  %u \n",mon_nom(),getpid(), table_processus[getpid()]->reveil);
 		ordonnancement();
 	}
+	exit(getpid());
+	return 0;
 }
 
-void proc3(void){
-	for(;;){
-		printf("[%s] pid = %d , pere : %d\n",mon_nom(),getpid(),processus_actif->pere->pid);
-		kill(1);
-		start(proc4,"fils3",0,3);
-		ordonnancement();
-	}
+int proc3(void* p){
+	(void)p;
+	for(int i=0;i<3;i++){
+			printf("[%s] pid = %d +  %u \n",mon_nom(),getpid(), table_processus[getpid()]->reveil);
+			ordonnancement();
+		}
+	exit(getpid());
+	return 0;
 }
 
-void proc4(void){
-	for(;;){
-		printf("[%s] pid = %d , pere : %d\n",mon_nom(),getpid(),processus_actif->pere->pid);
-		kill(2);
+int proc4(void* p){
+	(void)p;
+	for(int i=0;i<4;i++){
+		printf("[%s] pid = %d *  %u \n",mon_nom(),getpid(), table_processus[getpid()]->reveil);
 		ordonnancement();
 	}
+	exit(getpid());
+	return 0;
 }
 
 void ordonnancement_simple(){
@@ -140,17 +153,17 @@ void ordonnancement_simple(){
 	Processus* ancien;
 
 	prochain = table_processus[(pid_actif + 1)%NBPROC];
-	
+
 	processus_actif->etat = activable;
 	prochain->etat=actif;
 	ancien = processus_actif;
 	processus_actif = prochain;
-	
-	ctx_sw(ancien->registres, prochain->registres);
-	
 
-	
-	
+	ctx_sw(ancien->registres, prochain->registres);
+
+
+
+
 }
 
 void ordonnancement(void){
@@ -158,55 +171,58 @@ void ordonnancement(void){
 	Processus* top;
 	Processus* ancien;
 
-	int time=1;
 
-	//On verifie bien que si l'actif à été endormi, 
+	//On verifie bien que si l'actif à été endormi,
 	//On ne le reveil pas et que s'il est actif on le remet dans la file
 	if (processus_actif->etat == actif){
 		processus_actif->etat = activable;
 		queue_add(processus_actif,&file_processus,Processus,lien,prio);
-		
+	}
+
+	if (processus_actif->etat == endormi){
+		queue_add(processus_actif,&file_processus,Processus,lien,prio);
 	}
 
 	if (processus_actif->etat == mort){
 		ctx_sw(processus_actif->registres, table_processus[NBPROC]->registres);
 	}
-		
-	
+
+
+
 	//Verification qu'il y a bien des process à executer, sinon c'est idle qui est choisit.
 	if (!queue_empty(&file_processus)){
 		top = queue_top(&file_processus,Processus,lien);
 		//Choix d'un processus activable
 		while (top->etat != activable){
 			//Actualisation des etats endormi si necessaire
-			if (top->etat == endormi && time>top->reveil){
+			if (top->etat == endormi && sec>top->reveil){
 				top->etat = activable;
-			} 
+			}
 			top = queue_top(&top->lien,Processus,lien);
-		} 
-		
+		}
+
 		//Suppression du processus choisi
 		prochain = top;
 		queue_del(top,lien);
-		
+
 
 	} else {
 		prochain = table_processus[0];
 	}
 
-	
+
 
 	//Contexte switch
 	prochain->etat=actif;
 	ancien = processus_actif;
 	processus_actif = prochain;
 	ctx_sw(ancien->registres, prochain->registres);
-		
+
 
 }
 
 
-void exit1(int retval){
+void exit(int retval){
 	if (processus_actif->pere != NULL){
 		processus_actif->etat = zombie;
 		processus_actif->retval = retval;
@@ -214,7 +230,9 @@ void exit1(int retval){
 		processus_actif->etat = mort;
 		kill_childs(processus_actif);
 	}
+	printf("terminaison du processus: %d \n", getpid());
 	ordonnancement();
+	while(1) {}
 }
 
 
@@ -242,7 +260,7 @@ int waitpid(int pid, int *retvalp){
 	} else {
 		if (pid<0){
 			Liste childs = processus_actif->childs;
-		
+
 			while(1){
 				while(childs !=NULL){
 					if (table_processus[childs->pid]->etat == zombie){
@@ -250,7 +268,7 @@ int waitpid(int pid, int *retvalp){
 						kill_childs(table_processus[childs->pid]);
 						free(table_processus[childs->pid]);
 						table_processus[childs->pid] = NULL;
-						
+
 						return childs->pid;
 					}
 					childs = childs->suiv;
@@ -267,7 +285,7 @@ int waitpid(int pid, int *retvalp){
 							kill_childs(table_processus[childs->pid]);
 							free(table_processus[childs->pid]);
 							table_processus[childs->pid] = NULL;
-						
+
 							return childs->pid;
 						}
 					}
@@ -276,7 +294,7 @@ int waitpid(int pid, int *retvalp){
 			}
 			return -1;
 		}
-			
+
 	}
 }
 
@@ -329,8 +347,8 @@ void kill_childs(Processus *P){
 	}
 }
 
-void dors(uint32_t nbr_secs){
-	processus_actif->reveil = nbr_secs;
+void wait_clock(uint32_t nbr_secs){
+	processus_actif->reveil += nbr_secs;
 	processus_actif->etat = endormi;
 	ordonnancement();
 }
