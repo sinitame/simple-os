@@ -18,7 +18,7 @@ int pcount(int fid, int *count) {
   }
   if (count!=NULL) {
     //si la file est vide
-    if (queue_empty(&tab_message_queues[fid]->messages)==0) {
+    if (queue_empty(&tab_message_queues[fid]->messages)!=0) {
       *count = -tab_message_queues[fid]->nb_b_c;
     }
     else {
@@ -113,7 +113,6 @@ int preceive(int fid,int *message) {
     nv_c=mem_alloc(sizeof(File_priorite));
     nv_c->val=getpid();
     nv_c->prio=getprio(getpid());
-    INIT_LIST_HEAD(&(nv_c->chaine));
     //Ajout de ce processus dans la liste des consommateurs bloqués
     queue_add(nv_c, &(tab_message_queues[fid]->blocked_consumers), File_priorite, chaine, prio);
     //Incrément du nombre des processus consomatteurs bloqués
@@ -189,8 +188,22 @@ int psend(int fid, int message){
   else if (tab_message_queues[fid]==NULL) {
     return -1;
   }
+  // Si la file de message est pleine
+  if (tab_message_queues[fid] -> nb_msg >= tab_message_queues[fid]-> queue_capacity){
+    // On enregistre le pid de ce processus
+    tab_message_queues[fid]->nb_b_p++;
+    File_priorite *nv_c;
+    nv_c=mem_alloc(sizeof(File_priorite));
+    nv_c->val=getpid();
+    nv_c->prio=getprio(getpid());
+    //Ajout de ce processus dans la liste des producteurs bloqués
+    queue_add(nv_c, &(tab_message_queues[fid]->blocked_producers), File_priorite, chaine, prio);
+    // On met le processus en attente
+    table_processus[getpid()]->etat=wait_io;
+    ordonnancement();
+  }
   // Si la file de messages n'est pas pleine
-  if (tab_message_queues[fid]->nb_msg<tab_message_queues[fid]->queue_capacity) {
+  else {
     File_priorite *nv_msg;
     nv_msg=mem_alloc(sizeof(File_priorite));
     nv_msg->val=message;
@@ -202,7 +215,6 @@ int psend(int fid, int message){
       msg=queue_top(&tab_message_queues[fid]->messages, File_priorite, chaine);
       nv_msg->prio=msg->prio+1;
     }
-    INIT_LIST_HEAD(&(nv_msg->chaine));
     queue_add(nv_msg, &(tab_message_queues[fid]->messages), File_priorite, chaine, prio);
     //incrément du nombre de messages dans la file
     tab_message_queues[fid]->nb_msg++;
@@ -216,21 +228,6 @@ int psend(int fid, int message){
       table_processus[proc->val]->etat=activable;
       ordonnancement();
     }
-  }
-  // Si la file de message est pleine
-  if (tab_message_queues[fid] -> nb_msg >= tab_message_queues[fid]-> queue_capacity){
-    // On enregistre le pid de ce processus
-    tab_message_queues[fid]->nb_b_p++;
-    File_priorite *nv_c;
-    nv_c=mem_alloc(sizeof(File_priorite));
-    nv_c->val=getpid();
-    nv_c->prio=getprio(getpid());
-    INIT_LIST_HEAD(&(nv_c->chaine));
-    //Ajout de ce processus dans la liste des producteurs bloqués
-    queue_add(nv_c, &(tab_message_queues[fid]->blocked_producers), File_priorite, chaine, prio);
-    // On met le processus en attente
-    table_processus[getpid()]->etat=wait_io;
-    ordonnancement();
   }
   return 0;
 }
