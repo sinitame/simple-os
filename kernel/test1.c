@@ -25,41 +25,41 @@ il faut ajouter le code de terminaison dans la pile lors de la creation des proc
 
 int dummy2(void *arg)
 {
-        printf(" 5");
+        printf("5 ");
         assert((int) arg == DUMMY_VAL + 1);
         return 4;
 }
 
 int dummy1(void *arg) {
-        printf("1");
+        printf("1 ");
         assert((int) arg == DUMMY_VAL);
         return 3;
 }
 
 int test1(void *arg)
 {
-        int pid1;
-        int r;
-        int rval;
+    int pid1;
+    int r;
+    int rval;
 
-        (void)arg;
-        init_idle();
+    (void)arg;
+    init_idle();
 
-        pid1 = start(dummy1, 4000, 192, "dummy1", (void *) DUMMY_VAL);
-        assert(pid1 > 0);
-        printf(" 2");
-        idle();
-        r = waitpid(pid1, &rval);
-        assert(r == pid1);
-        assert(rval == 3);
-        printf(" 3");
-        // pid1 = start(dummy2, 4000, 100, "dummy2", (void *) (DUMMY_VAL + 1));
-        // assert(pid1 > 0);
-        // printf(" 4");
-        // r = waitpid(pid1, &rval);
-        // assert(r == pid1);
-        // assert(rval == 4);
-        // printf(" 6.\n");
-        // idle();
-        return 0;
+    pid1 = start(dummy1, 4000, 192, "dummy1", (void *) DUMMY_VAL);
+    assert(pid1 > 0);
+    printf("2 ");
+    r = waitpid(pid1, &rval);
+    assert(r == pid1);
+    assert(rval == 3);
+    printf("3 ");
+
+    pid1 = start(dummy2, 4000, 100, "dummy2", (void *) (DUMMY_VAL + 1));
+    assert(pid1 > 0);
+    printf("4 ");
+    r = waitpid(pid1, &rval);
+    assert(r == pid1);
+    assert(rval == 4);
+    printf("6.\n");
+    idle();
+    return 0;
 }

@@ -7,6 +7,7 @@
 
 
 extern void ctx_sw(int*,int*);
+extern int read_eax();
 
 void init_idle(void){
 
@@ -39,8 +40,8 @@ void init_idle(void){
 	Ptueur->childs = NULL;
 	strcpy(Ptueur->nom,"tueur");
 	Ptueur->etat = activable;
-	Ptueur->registres[esp] = (uint32_t)((Ptueur->pile)+511);
-	Ptueur->pile[511] = (uint32_t)tueur;
+	Ptueur->registres[esp] = (uint32_t)((Ptueur->pile)+STACK_LENGTH-1);
+	Ptueur->pile[STACK_LENGTH-1] = (uint32_t)tueur;
 
 
 }
@@ -56,10 +57,10 @@ void init(int pid, const char* nom, int etat,int prio, int (*processus)(void*), 
 	P->childs = NULL;
 	strcpy(P->nom,nom);
 	P->etat = etat;
-	P->registres[esp] = (uint32_t)((P->pile)+509);
-	P->pile[509] = (uint32_t)processus;
-	P->pile[510] = (uint32_t)exit;
-	P->pile[511] = (uint32_t)arg;
+	P->registres[esp] = (uint32_t)((P->pile)+STACK_LENGTH-4);
+	P->pile[STACK_LENGTH-4] = (uint32_t)processus;
+	P->pile[STACK_LENGTH-3] = (uint32_t)exit;
+	P->pile[STACK_LENGTH-2] = (uint32_t)arg;
 	P->reveil = 0;
 
 	//Ajout du processus à la file des processus
@@ -70,13 +71,15 @@ void init(int pid, const char* nom, int etat,int prio, int (*processus)(void*), 
 	new_child->pid = pid;
 	new_child->suiv = processus_actif->childs;
 	processus_actif->childs = new_child;
+	if (prio > processus_actif->prio) {
+		ordonnancement();
+	}
 }
 
 uint32_t start(int(*code)(void*), unsigned long taille_pile, int prio, const char * nom, void *arg){
 	for (int futur_pid=0; futur_pid<NBPROC; futur_pid++){
 		if (table_processus[futur_pid] == NULL){
 			init(futur_pid,nom,activable,prio,code, arg);
-			printf("pid cree :%d \n", futur_pid);
 			return futur_pid;
 		}
 	}
@@ -223,6 +226,7 @@ void ordonnancement(void){
 
 
 void exit(int retval){
+	retval = read_eax();
 	if (processus_actif->pere != NULL){
 		processus_actif->etat = zombie;
 		processus_actif->retval = retval;
@@ -230,7 +234,6 @@ void exit(int retval){
 		processus_actif->etat = mort;
 		kill_childs(processus_actif);
 	}
-	printf("terminaison du processus: %d \n", getpid());
 	ordonnancement();
 	while(1) {}
 }
