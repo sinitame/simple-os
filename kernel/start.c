@@ -1,13 +1,16 @@
-#include "cpu.h"
-#include "test0.h"
-#include "test1.h"
-#include "stdio.h"
-#include "../shared/stddef.h"
-#include "../shared/console.h"
 #include <inttypes.h>
 #include <start.h>
+
+#include "cpu.h"
+#include "stdio.h"
+
+#include "../shared/stddef.h"
+#include "../shared/console.h"
 #include "../user/lib/clock.h"
 #include "processus.h"
+
+#include "tests.h"
+
 
 void kernel_start(void)
 {

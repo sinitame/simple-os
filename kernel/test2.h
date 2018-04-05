@@ -1,6 +1,6 @@
-// #ifndef _TEST1_H_
-// #define _TEST1_H_
-//
-// extern int test2(void *arg);
-//
-// #endif /* _TEST1_H_ */
+#ifndef _TEST2_H_
+#define _TEST2_H_
+
+extern int test2(void *arg);
+
+#endif /* _TEST2_H_ */

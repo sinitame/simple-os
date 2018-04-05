@@ -6,6 +6,6 @@ extern int no_run(void *arg);
 
 extern int waiter(void *arg);
 
-extern test5(void *arg);
+extern int test5(void *arg);
 
 #endif /* _TEST5_H_ */
