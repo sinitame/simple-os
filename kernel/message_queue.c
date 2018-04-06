@@ -94,6 +94,7 @@ int pdelete(int fid) {
     mem_free(curr_element,sizeof(File_priorite));
   }
   mem_free(tab_message_queues[fid], sizeof(Message_queue));
+  tab_message_queues[fid]=NULL;
   nb_queues--;
   return 0;
 }
@@ -123,7 +124,6 @@ int preceive(int fid,int *message) {
     ordonnancement();
   }
   //s'il existe au moins un message dans la file
-  else {
     //On extrait le message le plus ancien dans la file et on le place dans "message"
     File_priorite *msg;
     msg=queue_bottom(&tab_message_queues[fid]->messages, File_priorite, chaine);
@@ -142,8 +142,8 @@ int preceive(int fid,int *message) {
       //On décrément le nombre de processus producteurs bloqués
       tab_message_queues[fid]->nb_b_p--;
       table_processus[proc->val]->etat=activable;
+      queue_add(table_processus[proc->val], &file_processus,Processus,lien,prio);
       ordonnancement();
-    }
   }
   return 0;
 }
@@ -203,7 +203,6 @@ int psend(int fid, int message){
     ordonnancement();
   }
   // Si la file de messages n'est pas pleine
-  else {
     File_priorite *nv_msg;
     nv_msg=mem_alloc(sizeof(File_priorite));
     nv_msg->val=message;
@@ -226,8 +225,8 @@ int psend(int fid, int message){
       //On décrément le nombre de processus consomatteurs bloqués
       tab_message_queues[fid]->nb_b_c--;
       table_processus[proc->val]->etat=activable;
+      queue_add(table_processus[proc->val], &file_processus,Processus,lien,prio);
       ordonnancement();
-    }
   }
   return 0;
 }
