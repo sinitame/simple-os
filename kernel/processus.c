@@ -187,10 +187,11 @@ void ordonnancement(void){
 	}
 
 
-	if(processus_actif->etat == zombie && processus_actif->pere-> etat == wait_child){
-		processus_actif->pere->etat = activable;
+	if(processus_actif->etat == zombie){
+		if(processus_actif->pere-> etat == wait_child){
+			processus_actif->pere->etat = activable;
+		}
 		queue_add(processus_actif->pere,&file_processus,Processus,lien,prio);
-
 	}
 
 	if (processus_actif->etat == mort){
