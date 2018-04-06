@@ -24,7 +24,7 @@ void kernel_start(void)
 
 	//test1(0);
 	start(test2, 4000, 128, "test2", (void *) 77);
-
+	idle();
 
 	while(1)
 	  hlt();

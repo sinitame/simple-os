@@ -47,6 +47,5 @@
             assert(r == pid1);
             assert(waitpid(getpid(), &rval) < 0);
             printf(" 7.\n");
-            idle();
             return 0;
     }

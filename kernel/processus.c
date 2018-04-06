@@ -187,10 +187,8 @@ void ordonnancement(void){
 	}
 
 
-	if(processus_actif->etat == zombie){
-		if(processus_actif->pere-> etat == wait_child){
-			processus_actif->pere->etat = activable;
-		}
+	if(processus_actif->etat == zombie && processus_actif->pere-> etat == wait_child){
+		processus_actif->pere->etat = activable;
 		queue_add(processus_actif->pere,&file_processus,Processus,lien,prio);
 	}
 
@@ -209,7 +207,10 @@ void ordonnancement(void){
 			if (top->etat == endormi && sec>top->reveil){
 				top->etat = activable;
 			}
-			top = queue_top(&top->lien,Processus,lien);
+			// fix temporaire pour test2
+			if (top->pere != NULL) {
+				top = top->pere;
+			}
 		}
 
 		//Suppression du processus choisi
@@ -251,11 +252,9 @@ int kill(int pid){
 	if ((pid >=0) && (pid<NBPROC) && (table_processus[pid] != NULL)){
 		if (processus_actif->pere != NULL){
 			table_processus[pid]->etat = zombie;
-			printf("pid : %d deviens zombie \n",pid);
 		} else {
 			table_processus[pid]->etat = mort;
 			kill_childs(table_processus[pid]);
-			printf("pid : %d mort \n",pid);
 		}
 		return 0;
 	} else {

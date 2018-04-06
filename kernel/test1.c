@@ -59,6 +59,5 @@ int test1(void *arg)
     assert(r == pid1);
     assert(rval == 4);
     printf("6.\n");
-    idle();
     return 0;
 }
