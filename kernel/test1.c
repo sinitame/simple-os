@@ -43,7 +43,6 @@ int test1(void *arg)
     int rval;
 
     (void)arg;
-    init_idle();
 
     pid1 = start(dummy1, 4000, 192, "dummy1", (void *) DUMMY_VAL);
     assert(pid1 > 0);

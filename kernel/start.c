@@ -20,7 +20,11 @@ void kernel_start(void)
 	init_traitant_IT(32, traitant_IT_32);
 
 	efface_ecran();
-	test1(0);
+	init_idle();
+
+	//test1(0);
+	start(test1, 4000, 128, "test1", (void *) 77);
+
 
 	while(1)
 	  hlt();

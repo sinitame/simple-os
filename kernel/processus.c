@@ -186,6 +186,13 @@ void ordonnancement(void){
 		queue_add(processus_actif,&file_processus,Processus,lien,prio);
 	}
 
+
+	if(processus_actif->etat == zombie && processus_actif->pere-> etat == wait_child){
+		processus_actif->pere->etat = activable;
+		queue_add(processus_actif->pere,&file_processus,Processus,lien,prio);
+
+	}
+
 	if (processus_actif->etat == mort){
 		ctx_sw(processus_actif->registres, table_processus[NBPROC]->registres);
 	}
@@ -263,7 +270,6 @@ int waitpid(int pid, int *retvalp){
 	} else {
 		if (pid<0){
 			Liste childs = processus_actif->childs;
-
 			while(1){
 				while(childs !=NULL){
 					if (table_processus[childs->pid]->etat == zombie){
@@ -271,14 +277,14 @@ int waitpid(int pid, int *retvalp){
 						kill_childs(table_processus[childs->pid]);
 						free(table_processus[childs->pid]);
 						table_processus[childs->pid] = NULL;
-
 						return childs->pid;
 					}
 					childs = childs->suiv;
 				}
 				childs = processus_actif->childs;
 			}
-		} else {
+		}
+		else {
 			Liste childs = processus_actif->childs;
 			while(childs!=NULL){
 				if(childs->pid == pid){
@@ -291,6 +297,8 @@ int waitpid(int pid, int *retvalp){
 
 							return childs->pid;
 						}
+						processus_actif->etat = wait_child;
+						ordonnancement();
 					}
 				}
 				childs = childs->suiv;
