@@ -23,7 +23,7 @@ void kernel_start(void)
 	init_idle();
 
 	//test1(0);
-	start(test2, 4000, 128, "test2", (void *) 77);
+	start(test2, STACK_LENGTH, 128, "test2", (void *) 77);
 	idle();
 
 	while(1)

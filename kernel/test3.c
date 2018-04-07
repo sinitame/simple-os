@@ -1,5 +1,3 @@
-#ifdef __TEST3_H__
-
     #include "stdio.h"
     #include "processus.h"
 
@@ -39,7 +37,7 @@
             (void)arg;
 
             assert(getprio(getpid()) == 128);
-            pid1 = start("prio4", 4000, p, (void *) p);
+            pid1 = start(prio4, STACK_LENGTH, p, "prio4",  (void *) p);
             assert(pid1 > 0);
             printf(" 2");
             r = chprio(getpid(), 32);
@@ -52,7 +50,7 @@
             printf(" 6");
 
             assert(getprio(getpid()) == 128);
-            pid1 = start("prio5", 4000, p, (void *) p);
+            pid1 = start(prio5, STACK_LENGTH, p, "prio5", (void *) p);
             assert(pid1 > 0);
             printf(" 8");
             r = kill(pid1);
@@ -65,6 +63,5 @@
             r = chprio(getpid(), 128);
             assert(r == 32);
             printf(" 11.\n");
+            return 0;
     }
-
-#endif

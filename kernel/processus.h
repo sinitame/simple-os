@@ -31,7 +31,7 @@ struct Processus {
 	char nom[15];
 	enum etats etat;
 	int registres[5];
-	int pile[512];
+	int pile[STACK_LENGTH];
 	uint32_t reveil;
 	link lien;
 };
@@ -45,7 +45,7 @@ Processus *processus_actif;
 void init_idle(void);
 
 //Fonction d'initialisation d'un processus
-void init(int pid, const char* nom, int etat,int prio, int (*processus)(void*), void *arg);
+void init(int pid, const char* nom, unsigned long ssize,int prio, int (*processus)(void*), void *arg);
 /*
 /Fonction de creation d'un processus.
 /TODO : jouter l'argument paramètre
