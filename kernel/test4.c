@@ -1,8 +1,7 @@
-#ifdef _TEST4_H_
 
     #include "stdio.h"
     #include "test4.h"
-
+    #include "processus.h"
 
     int busy1(void *arg)
     {
@@ -12,7 +11,7 @@
 
                     printf(" A");
                     for (i=0; i<loop_count1; i++) {
-                            test_it();
+                            // test_it();
                             for (j=0; j<loop_count0; j++);
                     }
             }
@@ -30,7 +29,7 @@
 
                     printf(" B");
                     for (k=0; k<loop_count1; k++) {
-                            test_it();
+                            // test_it();
                             for (j=0; j<loop_count0; j++);
                     }
             }
@@ -48,9 +47,9 @@
             (void)args;
 
             assert(getprio(getpid()) == 128);
-            pid1 = start("busy1", 4000, 64, (void *) arg);
+            pid1 = start(busy1, STACK_LENGTH, 64, "busy1", (void *) arg);
             assert(pid1 > 0);
-            pid2 = start("busy2", 4000, 64, (void *) pid1);
+            pid2 = start(busy2, STACK_LENGTH, 64, "busy2", (void *) pid1);
             assert(pid2 > 0);
             printf("1 -");
             r = chprio(getpid(), 32);
@@ -69,5 +68,3 @@
 
             return 0;
     }
-
-#endif

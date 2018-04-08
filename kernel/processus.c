@@ -43,7 +43,7 @@ void init(int pid, const char* nom, unsigned long ssize,int prio, int (*processu
 	P->pid = pid;
 	P->pere = processus_actif;
 	P->prio = prio;
-	P->childs = NULL;
+	P->child = NULL;
 	strcpy(P->nom,nom);
 	P->etat = activable;
 	P->registres[esp] = (uint32_t)((P->pile)+STACK_LENGTH-3);
@@ -56,10 +56,14 @@ void init(int pid, const char* nom, unsigned long ssize,int prio, int (*processu
 	queue_add(P,&file_processus,Processus,lien,prio);
 
 	//Ajout du processus crée à la liste des fils du process actif
-	Liste new_child = malloc(sizeof(*new_child));
-	new_child->pid = pid;
-	new_child->suiv = processus_actif->childs;
-	processus_actif->childs = new_child;
+	//la tete de liste est toujours le fils le plus recemment cree
+	P->suiv=processus_actif->child;
+	if (processus_actif->child != NULL) {
+		processus_actif->child->prec=P;
+	}
+	processus_actif->child=P;
+	P->prec=processus_actif->child;
+	// si la prio du processus cree est superieure a celle du processus actif
 	if (prio > processus_actif->prio) {
 		ordonnancement();
 	}
@@ -172,51 +176,50 @@ int kill(int pid){
 
 int waitpid(int pid, int *retvalp){
 
-	if (processus_actif->childs == NULL){
+	if (processus_actif->child == NULL){
 		return -1;
 	} else {
+		Processus * child = processus_actif->child;
 		if (pid<0){
-			Liste childs = processus_actif->childs;
-			while(1){
-				while(childs !=NULL){
-					if (table_processus[childs->pid]->etat == zombie){
-						*retvalp = table_processus[childs->pid]->retval;
-						kill_childs(table_processus[childs->pid]);
-						free(table_processus[childs->pid]);
-						queue_del(table_processus[childs->pid], lien);
-						table_processus[childs->pid] = NULL;
-						return childs->pid;
-					}
-					childs = childs->suiv;
+			while(child !=NULL){
+				if (child->etat == zombie){
+					*retvalp = child->retval;
+					kill_childs(child);
+					queue_del(child, lien);
+					table_processus[child->pid] = NULL;
+					free(child);
+					return pid;
 				}
-				childs = processus_actif->childs;
+				child = child->suiv;
 			}
+			processus_actif->etat = wait_child;
+			ordonnancement();
 		}
 		else {
-			Liste childs = processus_actif->childs;
-			while(childs!=NULL){
-				if(childs->pid == pid){
-					while(1){
-						if(table_processus[childs->pid]->etat == zombie){
-							*retvalp = table_processus[childs->pid]->retval;
-							kill_childs(table_processus[pid]);
-							free(table_processus[childs->pid]);
-							// on enleve le processus de la file
-							queue_del(table_processus[pid], lien);
-							table_processus[pid] = NULL;
-
-							return childs->pid;
+			while(child!=NULL){
+				if(child->pid == pid){
+					if(child->etat == zombie){
+						if (retvalp != NULL) {
+							*retvalp = child->retval;
 						}
-						processus_actif->etat = wait_child;
-						ordonnancement();
+						kill_childs(child);
+						queue_del(child, lien);
+						table_processus[pid] = NULL;
+						free(child);
+						// on enleve le processus de la file
+
+
+						return child->pid;
 					}
+					processus_actif->etat = wait_child;
+					ordonnancement();
 				}
-				childs = childs->suiv;
 			}
 			return -1;
 		}
 
 	}
+	return -1;
 }
 
 
@@ -235,9 +238,11 @@ int chprio(int pid, int newprio){
 	if (pid<0 || pid>=NBPROC || table_processus[pid] == NULL){
 		return -1;
 	} else {
+		queue_del(table_processus[pid], lien);
 		int ancienne_prio = table_processus[pid]->prio;
 		table_processus[pid]->prio = newprio;
-		//TODO : Supprimer le processus des files d'attente et le remettre avec sa bonne priorité
+		queue_add(table_processus[pid], &file_processus, Processus, lien, prio);
+		ordonnancement();
 		return ancienne_prio;
 	}
 }
@@ -256,22 +261,30 @@ Lors de la mort du pere, les fils doivent :
 - etre marques comme n'ayant plus de pere
 */
 void kill_childs(Processus *P){
-	Liste childs = P->childs;
-	Processus * child;
-	while (childs != NULL){
-		child = table_processus[childs->pid];
-		if (child != NULL){ // ne sert a rien mais protection
-			// si on tombe sur un zombie, il doit etre detruit car aucun pere pour l'attendre
-			if (child->etat == zombie){
-				queue_del(processus_actif, lien);
-				free(table_processus[child->pid]);
-				table_processus[child->pid] = NULL;
-			// sinon il n'y a plus de pointeur sur le pere
-			} else {
-				child->pere = NULL;
-			}
+	Processus* child = P->child;
+	while (child != NULL){
+		// si on tombe sur un zombie, il doit etre detruit car aucun pere pour l'attendre
+		if (child->etat == zombie){
+			queue_del(child, lien);
+			table_processus[child->pid] = NULL;
+			free(child);
+		// sinon il n'y a plus de pointeur sur le pere
+		} else {
+			child->pere = NULL;
 		}
-		childs = childs->suiv;
+		child = child->suiv;
+	}
+	if (P->pere != NULL) {
+		child = P->pere->child;
+		while (child != NULL && child->pid != P->pid) {
+			child=child->suiv;
+		}
+		if (child->suiv != NULL) {
+			child->suiv->prec=child->prec;
+			child->prec->suiv=child->suiv;
+		} else {
+			P->pere->child=NULL;
+		}
 	}
 }
 

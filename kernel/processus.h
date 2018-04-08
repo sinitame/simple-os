@@ -15,25 +15,26 @@ enum registre_type{ebx=0,esp=1,ebp=2,esi=3,edi=4}; //index du tableau
 enum etats {actif,activable,wait_sem,wait_io,wait_child,endormi,zombie,mort};
 
 typedef struct Processus Processus;
-typedef struct Element *Liste;
-
-struct Element {
-	int pid;
-	Liste suiv ;
-};
 
 struct Processus {
 	int pid;
 	int prio;
-	Processus *pere;
 	int retval;
-	Liste childs;
-	char nom[15];
 	enum etats etat;
+	uint32_t reveil;
+	char nom[15];
 	int registres[5];
 	int pile[STACK_LENGTH];
-	uint32_t reveil;
+	Processus *pere;
+	// pour la file de prio
 	link lien;
+
+	// pour la liste des fils
+	// liste doublement chainee non circulaire
+	// tete de liste = p->child
+	Processus *child;
+	Processus *prec;
+	Processus *suiv;
 };
 
 
@@ -53,14 +54,7 @@ void init(int pid, const char* nom, unsigned long ssize,int prio, int (*processu
 uint32_t start(int(*code)(void*), unsigned long taille_pile, int prio, const char * nom, void *arg);
 //Fonction crées pour les tests
 void idle(void);
-void tueur(void);
-int proc1(void* p);
-int proc2(void* p);
-int proc3(void* p);
-int proc4(void* p);
 
-//Fonctions gérant l'ordonnancement des processus
-void ordonnancement_simple(void);
 void ordonnancement(void);
 
 //Primitives de gestion des processus comme spécifié dans la spec
