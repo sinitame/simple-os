@@ -5,7 +5,6 @@
 #include <string.h>
 #include "../shared/malloc.c"
 
-
 extern void ctx_sw(int*,int*);
 extern int read_eax();
 
@@ -27,9 +26,12 @@ void init_idle(void){
 	table_processus[0] = malloc(sizeof(Processus));
 	Processus *P = table_processus[0];
 	P->pid = 0;
+	P->reveil=0;
+	P->prio = 1;
 	strcpy(P->nom,"idle");
 	P->etat = actif;
 	processus_actif = P;
+	queue_add(P, &file_processus,Processus,lien,prio);
 
 }
 
@@ -91,64 +93,44 @@ void ordonnancement(void){
 	Processus* top;
 	Processus* ancien;
 
-	if (processus_actif->etat == mort){
-		table_processus[processus_actif->pid] = NULL;
-		free(processus_actif);
-	}
+	if (!queue_empty(&file_processus)) {
 
-	//On verifie bien que si l'actif à été endormi,
-	//On ne le reveil pas et que s'il est actif on le remet dans la file
-	if (processus_actif->etat == actif){
-		processus_actif->etat = activable;
-		queue_add(processus_actif,&file_processus,Processus,lien,prio);
-	}
+		// parcours de la file dans le sens des prio DECROISSANTE donc queue_for_each_prev
+		queue_for_each_prev(top, &file_processus, Processus, lien) {
 
-	if (processus_actif->etat == endormi){
-		queue_add(processus_actif,&file_processus,Processus,lien,prio);
-	}
-
-
-	if(processus_actif->etat == zombie && processus_actif->pere-> etat == wait_child){
-		processus_actif->pere->etat = activable;
-		queue_add(processus_actif->pere,&file_processus,Processus,lien,prio);
-	}
-
-
-
-
-
-	//Verification qu'il y a bien des process à executer, sinon c'est idle qui est choisit.
-	if (!queue_empty(&file_processus)){
-		top = queue_top(&file_processus,Processus,lien);
-		//Choix d'un processus activable
-		while (top->etat != activable){
-			//Actualisation des etats endormi si necessaire
-			if (top->etat == endormi && sec>top->reveil){
-				top->etat = activable;
+			// cas de base : le processus_actif est le plus prioritaire et est actif (changement d'etat possible)
+			if (top==processus_actif && processus_actif->etat==actif) {
+				prochain=top;
+				break;
+			// reveil des endormis
+			} else if (top->etat == endormi && sec>top->reveil){
+					top->etat = activable;
+				// si zombie avec un pere en attente
+			} else if(top->etat == zombie && top->pere-> etat == wait_child){
+				top->pere->etat = activable;
 			}
-			// fix temporaire pour test2
-			if (top->pere != NULL) {
-				top = top->pere;
+
+			// arret de la boucle si on a trouve un processus a activer
+			// en fin de boucle car top peut avoir change d'etat entre temps
+			if (top->etat==activable) {
+				prochain=top;
+				break;
 			}
 		}
 
-		//Suppression du processus choisi
-		prochain = top;
-		queue_del(top,lien);
-
-
 	} else {
+		// idle
 		prochain = table_processus[0];
 	}
 
-
-
-	//Contexte switch
-	prochain->etat=actif;
-	ancien = processus_actif;
-	processus_actif = prochain;
-	ctx_sw(ancien->registres, prochain->registres);
-
+	// enfin on evitera qu'un processus ne se passe la main a lui-meme
+	// if (prochain != processus_actif) {
+		prochain->etat=actif;
+		ancien = processus_actif;
+		ancien->etat=(ancien->etat==actif)?activable:ancien->etat;
+		processus_actif = prochain;
+		ctx_sw(ancien->registres, prochain->registres);
+	// }
 
 }
 
@@ -159,8 +141,7 @@ void exit(int retval){
 		processus_actif->etat = zombie;
 		processus_actif->retval = retval;
 	} else {
-		processus_actif->etat = mort;
-		kill_childs(processus_actif);
+		kill(processus_actif->pid);
 	}
 	ordonnancement();
 	while(1) {}
@@ -169,11 +150,17 @@ void exit(int retval){
 
 int kill(int pid){
 	if ((pid >=0) && (pid<NBPROC) && (table_processus[pid] != NULL)){
+		// cas d'un pere : un processus peut appeler kill explicitement
+		// donc redondant avec le code de exit
 		if (table_processus[pid]->pere != NULL){
 			table_processus[pid]->etat = zombie;
+
 		} else {
-			table_processus[pid]->etat = mort;
 			kill_childs(table_processus[pid]);
+			// on enleve le processus de la file
+			queue_del(processus_actif, lien);
+			table_processus[processus_actif->pid] = NULL;
+			free(processus_actif);
 		}
 		ordonnancement();
 		return 0;
@@ -196,6 +183,7 @@ int waitpid(int pid, int *retvalp){
 						*retvalp = table_processus[childs->pid]->retval;
 						kill_childs(table_processus[childs->pid]);
 						free(table_processus[childs->pid]);
+						queue_del(table_processus[childs->pid], lien);
 						table_processus[childs->pid] = NULL;
 						return childs->pid;
 					}
@@ -211,9 +199,11 @@ int waitpid(int pid, int *retvalp){
 					while(1){
 						if(table_processus[childs->pid]->etat == zombie){
 							*retvalp = table_processus[childs->pid]->retval;
-							kill_childs(table_processus[childs->pid]);
+							kill_childs(table_processus[pid]);
 							free(table_processus[childs->pid]);
-							table_processus[childs->pid] = NULL;
+							// on enleve le processus de la file
+							queue_del(table_processus[pid], lien);
+							table_processus[pid] = NULL;
 
 							return childs->pid;
 						}
@@ -271,8 +261,9 @@ void kill_childs(Processus *P){
 	while (childs != NULL){
 		child = table_processus[childs->pid];
 		if (child != NULL){ // ne sert a rien mais protection
-			// si on tombe sur un zombie, il doit etre detruit
+			// si on tombe sur un zombie, il doit etre detruit car aucun pere pour l'attendre
 			if (child->etat == zombie){
+				queue_del(processus_actif, lien);
 				free(table_processus[child->pid]);
 				table_processus[child->pid] = NULL;
 			// sinon il n'y a plus de pointeur sur le pere

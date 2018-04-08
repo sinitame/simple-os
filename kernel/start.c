@@ -22,8 +22,10 @@ void kernel_start(void)
 	efface_ecran();
 	init_idle();
 
-	//test1(0);
-	start(test2, STACK_LENGTH, 128, "test2", (void *) 77);
+	start(test1, STACK_LENGTH, 128, "test1", (void *) 77);
+	// start(test2, STACK_LENGTH, 128, "test2", (void *) 77);
+	// start(test3, STACK_LENGTH, 128, "test3", (void *) 77);
+
 	idle();
 
 	while(1)
