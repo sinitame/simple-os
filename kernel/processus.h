@@ -42,32 +42,19 @@ Processus *table_processus[NBPROC+1];
 link file_processus;
 Processus *processus_actif;
 
-//Fonction d'initialisation de idle
+// idle
 void init_idle(void);
-
-//Fonction d'initialisation d'un processus
-void init(int pid, const char* nom, unsigned long ssize,int prio, int (*processus)(void*), void *arg);
-/*
-/Fonction de creation d'un processus.
-/TODO : jouter l'argument paramètre
-*/
-uint32_t start(int(*code)(void*), unsigned long taille_pile, int prio, const char * nom, void *arg);
-//Fonction crées pour les tests
 void idle(void);
 
+int start(int(*code)(void*), unsigned long taille_pile, int prio, const char * nom, void *arg);
 void ordonnancement(void);
 
-//Primitives de gestion des processus comme spécifié dans la spec
 void exit(int retval);
 int kill(int pid);
 int waitpid(int pid, int *retvalp);
 int getprio(int pid);
 int chprio(int pid, int newprio);
 int getpid(void);
-
-//Fonctions annexes utiles
-char * mon_nom(void);
-void kill_childs(Processus *P);
 void wait_clock(uint32_t nbr_secs);
 
 #endif

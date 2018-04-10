@@ -7,6 +7,8 @@
 #include "test6.h"
 #include "test7.h"
 #include "test8.h"
-// #include "test9.h"
+#include "test9.h"
 #include "test10.h"
 #include "test11.h"
+
+#include "test_manage_child.h"

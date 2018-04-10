@@ -62,14 +62,14 @@ void init(int pid, const char* nom, unsigned long ssize,int prio, int (*processu
 		processus_actif->child->prec=P;
 	}
 	processus_actif->child=P;
-	P->prec=processus_actif->child;
+	P->prec=NULL;
 	// si la prio du processus cree est superieure a celle du processus actif
 	if (prio > processus_actif->prio) {
 		ordonnancement();
 	}
 }
 
-uint32_t start(int(*code)(void*), unsigned long ssize, int prio, const char * nom, void *arg){
+int start(int(*code)(void*), unsigned long ssize, int prio, const char * nom, void *arg){
 	for (int futur_pid=0; futur_pid<NBPROC; futur_pid++){
 		if (table_processus[futur_pid] == NULL){
 			init(futur_pid,nom,ssize,prio,code, arg);
@@ -92,16 +92,33 @@ void idle(void)
 	}
 }
 
+void context_switch(Processus *prochain) {
+	// un processus ne se repasse pas la main
+	Processus *ancien=processus_actif;
+	// int regs[5];
+	if (prochain != ancien) {
+		prochain->etat=actif;
+		ancien->etat=(ancien->etat==actif)?activable:ancien->etat;
+		// precaution
+		// for (int i=0; i<5; i++) {
+		// 	regs[i]=ancien->registres[i];
+		// }
+		// si l'ancien est mort, on le libere
+		if (ancien->etat==mort) {
+			free(ancien);
+		}
+		processus_actif = prochain;
+		ctx_sw(ancien->registres, prochain->registres);
+	}
+}
+
 void ordonnancement(void){
 	Processus* prochain;
 	Processus* top;
-	Processus* ancien;
 
 	if (!queue_empty(&file_processus)) {
-
 		// parcours de la file dans le sens des prio DECROISSANTE donc queue_for_each_prev
 		queue_for_each_prev(top, &file_processus, Processus, lien) {
-
 			// cas de base : le processus_actif est le plus prioritaire et est actif (changement d'etat possible)
 			if (top==processus_actif && processus_actif->etat==actif) {
 				prochain=top;
@@ -113,31 +130,25 @@ void ordonnancement(void){
 			} else if(top->etat == zombie && top->pere-> etat == wait_child){
 				top->pere->etat = activable;
 			}
-
+			else if (processus_actif->etat==zombie && processus_actif->pere->etat==wait_child) {
+				processus_actif->pere->etat=activable;
+			}
 			// arret de la boucle si on a trouve un processus a activer
-			// en fin de boucle car top peut avoir change d'etat entre temps
 			if (top->etat==activable) {
 				prochain=top;
 				break;
 			}
 		}
-
 	} else {
 		// idle
 		prochain = table_processus[0];
 	}
 
-	// enfin on evitera qu'un processus ne se passe la main a lui-meme
-	// if (prochain != processus_actif) {
-		prochain->etat=actif;
-		ancien = processus_actif;
-		ancien->etat=(ancien->etat==actif)?activable:ancien->etat;
-		processus_actif = prochain;
-		ctx_sw(ancien->registres, prochain->registres);
-	// }
+	context_switch(prochain);
 
 }
 
+void manage_children(Processus *p);
 
 void exit(int retval){
 	retval = read_eax();
@@ -145,26 +156,70 @@ void exit(int retval){
 		processus_actif->etat = zombie;
 		processus_actif->retval = retval;
 	} else {
-		kill(processus_actif->pid);
+		processus_actif->etat=mort;
 	}
+	queue_del(processus_actif, lien);
+	manage_children(processus_actif);
 	ordonnancement();
 	while(1) {}
 }
 
+/*
+Lors de la mort de'un processus,
+celui-ci doit etre enleve de la liste des fils de son pere
+*/
+void manage_childlist(Processus *P) {
+	if (P->pere != NULL) {
+		Processus *child = P->pere->child;
+		while (child != NULL && child->pid != P->pid) {
+			child=child->suiv;
+		}
+		if (child->suiv != NULL) {
+			child->suiv->prec=child->prec;
+		if (child->suiv != NULL) {
+			child->prec->suiv=child->suiv;
+		}
+		} else {
+			P->pere->child=NULL;
+		}
+	}
+}
+
+/*
+Lors de la mort du pere, les fils doivent :
+- etre detruits s'ils sont zombies
+- etre marques comme n'ayant plus de pere
+*/
+void manage_children(Processus *P){
+	Processus* child = P->child;
+	// pour ne pas scier la branche sur laquelle on est
+	Processus *tmp;
+	while (child != NULL){
+		tmp = child->suiv;
+		// si on tombe sur un zombie, il doit etre detruit car aucun pere ne l'attendra
+		if (child->etat == zombie){
+			free(child);
+		// sinon il n'y a plus de pointeur sur le pere
+		} else {
+			child->pere = NULL;
+		}
+		child = tmp;
+	}
+}
 
 int kill(int pid){
 	if ((pid >=0) && (pid<NBPROC) && (table_processus[pid] != NULL)){
-		// cas d'un pere : un processus peut appeler kill explicitement
-		// donc redondant avec le code de exit
+		// on enleve le processus de la file
+		queue_del(table_processus[pid], lien);
+		// fait le menage dans la liste des fils
+		manage_children(table_processus[pid]);
+		// si le processus a un pere on le met en zombie
 		if (table_processus[pid]->pere != NULL){
 			table_processus[pid]->etat = zombie;
-
 		} else {
-			kill_childs(table_processus[pid]);
-			// on enleve le processus de la file
-			queue_del(processus_actif, lien);
-			table_processus[processus_actif->pid] = NULL;
-			free(processus_actif);
+			// sinon on le passe dans l'etat mort
+			// il sera libere lors du prochain appel a ordonnancement
+			table_processus[pid]->etat=mort;
 		}
 		ordonnancement();
 		return 0;
@@ -174,56 +229,50 @@ int kill(int pid){
 
 }
 
-int waitpid(int pid, int *retvalp){
+int destroy_child(Processus *child, int *retvalp) {
+	int pid=child->pid;
+	if (retvalp!=NULL) {*retvalp = child->retval;}
+	// on l'enleve de la liste des fils de son pere
+	manage_childlist(child);
+	// enfin on libere le pid
+	free(child);
+	return pid;
+}
 
-	if (processus_actif->child == NULL){
+int waitpid(int pid, int *retvalp){
+	Processus * child = processus_actif->child;
+
+	if (child == NULL){
 		return -1;
-	} else {
-		Processus * child = processus_actif->child;
-		if (pid<0){
+	} else if (pid <0){
+		while (1) {
 			while(child !=NULL){
 				if (child->etat == zombie){
-					*retvalp = child->retval;
-					kill_childs(child);
-					queue_del(child, lien);
-					table_processus[child->pid] = NULL;
-					free(child);
-					return pid;
+					return destroy_child(child, retvalp);
 				}
 				child = child->suiv;
 			}
 			processus_actif->etat = wait_child;
 			ordonnancement();
+			// retour au debut pour attente active
+			child=processus_actif->child;
 		}
-		else {
-			while(child!=NULL){
-				if(child->pid == pid){
+	} else {
+		while(child!=NULL){
+			if(child->pid == pid){
+				while (1) {
 					if(child->etat == zombie){
-						if (retvalp != NULL) {
-							*retvalp = child->retval;
-						}
-						kill_childs(child);
-						queue_del(child, lien);
-						table_processus[pid] = NULL;
-						free(child);
-						// on enleve le processus de la file
-
-
-						return child->pid;
+						return destroy_child(child, retvalp);
 					}
 					processus_actif->etat = wait_child;
 					ordonnancement();
 				}
 			}
-			return -1;
+			child=child->suiv;
 		}
-
 	}
 	return -1;
 }
-
-
-
 
 int getprio(int pid){
 	if (pid<0 || pid>=NBPROC || table_processus[pid] == NULL){
@@ -253,39 +302,6 @@ int getpid(void){
 
 char* mon_nom(void){
 	return processus_actif->nom;
-}
-
-/*
-Lors de la mort du pere, les fils doivent :
-- etre detruits s'ils sont zombies
-- etre marques comme n'ayant plus de pere
-*/
-void kill_childs(Processus *P){
-	Processus* child = P->child;
-	while (child != NULL){
-		// si on tombe sur un zombie, il doit etre detruit car aucun pere pour l'attendre
-		if (child->etat == zombie){
-			queue_del(child, lien);
-			table_processus[child->pid] = NULL;
-			free(child);
-		// sinon il n'y a plus de pointeur sur le pere
-		} else {
-			child->pere = NULL;
-		}
-		child = child->suiv;
-	}
-	if (P->pere != NULL) {
-		child = P->pere->child;
-		while (child != NULL && child->pid != P->pid) {
-			child=child->suiv;
-		}
-		if (child->suiv != NULL) {
-			child->suiv->prec=child->prec;
-			child->prec->suiv=child->suiv;
-		} else {
-			P->pere->child=NULL;
-		}
-	}
 }
 
 void wait_clock(uint32_t nbr_secs){
