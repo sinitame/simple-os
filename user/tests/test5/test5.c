@@ -36,4 +36,5 @@ int main(void *arg)
         assert(waitpid(pid1, &r) == pid1);
         assert(r == 0);
         printf("ok.\n");
+        return 0;
 }
