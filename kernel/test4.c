@@ -2,18 +2,21 @@
     #include "stdio.h"
     #include "test4.h"
     #include "processus.h"
+    #include "../user/tests/lib/it.c"
 
     int busy1(void *arg)
     {
             (void)arg;
+            int k=0;
             while (1) {
                     int i, j;
 
                     printf(" A");
                     for (i=0; i<loop_count1; i++) {
-                            // test_it();
+                            test_it();
                             for (j=0; j<loop_count0; j++);
                     }
+                    k++;
             }
             return 0;
     }
@@ -29,7 +32,7 @@
 
                     printf(" B");
                     for (k=0; k<loop_count1; k++) {
-                            // test_it();
+                            test_it();
                             for (j=0; j<loop_count0; j++);
                     }
             }

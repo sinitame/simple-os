@@ -139,6 +139,9 @@ void ordonnancement(void){
 				break;
 			}
 		}
+		// gestion de la FIFO a prio egale
+		queue_del(prochain, lien);
+		queue_add(prochain, &file_processus, Processus, lien, prio);
 	} else {
 		// idle
 		prochain = table_processus[0];
