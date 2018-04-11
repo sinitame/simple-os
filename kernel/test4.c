@@ -1,17 +1,32 @@
+    #ifdef _TEST4_H_
 
     #include "stdio.h"
-    #include "test4.h"
+    #include "tests.h"
     #include "processus.h"
+
+
+/*
+    void test_it(void)
+    {
+    #ifdef microblaze
+            int status, mstatus;
+            __asm__ volatile("mfs %0,rmsr; ori %1,%0,2; mts rmsr,%1; nop; nop; mts rmsr,%0":"=r" (status), "=r" (mstatus));
+    #else
+            __asm__ volatile("pushfl; testl $0x200,(%%esp); jnz 0f; sti; nop; cli; 0: addl $4,%%esp\n":::"memory");
+    #endif
+  }*/
+
 
     int busy1(void *arg)
     {
             (void)arg;
             while (1) {
+
                     int i, j;
 
                     printf(" A");
                     for (i=0; i<loop_count1; i++) {
-                            // test_it();
+                            test_it();
                             for (j=0; j<loop_count0; j++);
                     }
             }
@@ -68,3 +83,5 @@
 
             return 0;
     }
+
+    #endif
