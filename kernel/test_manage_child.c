@@ -32,14 +32,8 @@ int killer(void *args)
 		printf("1");
 		pid1=start(father, STACK_LENGTH, 192, "father", (void *) args);
 		printf(" 5");
-		assert(table_processus[3]->etat==zombie && table_processus[4]->etat==activable);
 		// killer tue father qui a deux fils : child1 (zombie car il s'est execute) et child2 (encore activable)
 		kill(pid1);
-		Processus* mystere=queue_entry(((Processus*)queue_bottom(&file_processus, Processus, lien))->lien.next, Processus, lien);
-		// le processus qui suit idle est child2
-		assert(mystere==table_processus[4]);
-		// le haut de la file est occupe par killer car father et child1 ont ete enleves
-		assert(queue_top(&file_processus, Processus, lien)==table_processus[1]);
 		printf(" 6.\n");
 		return 0;
 }

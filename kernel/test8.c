@@ -4,22 +4,13 @@
  * Creation de processus se suicidant en boucle. Test de la vitesse de creation
  * de processus.
  ******************************************************************************/
-//#ifdef _TEST8_H_
+#ifdef _TEST8_H_
 
     #include <stdio.h>
     #include "processus.h"
     #include "div64.h"
     #include "tests.h"
-
-    void test_it(void)
-    {
-    #ifdef microblaze
-            int status, mstatus;
-            __asm__ volatile("mfs %0,rmsr; ori %1,%0,2; mts rmsr,%1; nop; nop; mts rmsr,%0":"=r" (status), "=r" (mstatus));
-    #else
-            __asm__ volatile("pushfl; testl $0x200,(%%esp); jnz 0f; sti; nop; cli; 0: addl $4,%%esp\n":::"memory");
-    #endif
-    }
+    #include "../user/tests/lib/it.c"
 
 
 
@@ -78,4 +69,4 @@
             return 0;
     }
 
-//#endif
+#endif

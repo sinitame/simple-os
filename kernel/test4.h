@@ -19,8 +19,6 @@ static const int loop_count0 = 5000;
 static const int loop_count1 = 10000;
 
 
-
-
 #endif
 
 #endif /* _TEST4_H_ */

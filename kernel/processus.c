@@ -105,6 +105,7 @@ void context_switch(Processus *prochain) {
 		// }
 		// si l'ancien est mort, on le libere
 		if (ancien->etat==mort) {
+			table_processus[ancien->pid]=NULL;
 			free(ancien);
 		}
 		processus_actif = prochain;
@@ -139,7 +140,6 @@ void ordonnancement(void){
 				break;
 			}
 		}
-		// gestion de la FIFO a prio egale
 		queue_del(prochain, lien);
 		queue_add(prochain, &file_processus, Processus, lien, prio);
 	} else {
@@ -162,6 +162,7 @@ void exit(int retval){
 		processus_actif->etat=mort;
 	}
 	queue_del(processus_actif, lien);
+	table_processus[processus_actif->pid]=NULL;
 	manage_children(processus_actif);
 	ordonnancement();
 	while(1) {}
@@ -177,13 +178,12 @@ void manage_childlist(Processus *P) {
 		while (child != NULL && child->pid != P->pid) {
 			child=child->suiv;
 		}
-		if (child->suiv != NULL) {
-			child->suiv->prec=child->prec;
-		if (child->suiv != NULL) {
-			child->prec->suiv=child->suiv;
-		}
-		} else {
+		if (child->suiv==NULL && child->prec==NULL) {
 			P->pere->child=NULL;
+		} else if (child->suiv != NULL) {
+			child->suiv->prec=child->prec;
+		} else if (child->prec != NULL) {
+			child->prec->suiv=child->suiv;
 		}
 	}
 }
@@ -211,7 +211,7 @@ void manage_children(Processus *P){
 }
 
 int kill(int pid){
-	if ((pid >=0) && (pid<NBPROC) && (table_processus[pid] != NULL)){
+	if ((pid >0) && (pid<NBPROC) && (table_processus[pid] != NULL)){
 		// on enleve le processus de la file
 		queue_del(table_processus[pid], lien);
 		// fait le menage dans la liste des fils

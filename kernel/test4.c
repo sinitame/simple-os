@@ -1,22 +1,14 @@
-    #ifdef _TEST4_H_
-
     #include "stdio.h"
     #include "tests.h"
     #include "processus.h"
     #include "../user/tests/lib/it.c"
 
-
 /*
-    void test_it(void)
-    {
-    #ifdef microblaze
-            int status, mstatus;
-            __asm__ volatile("mfs %0,rmsr; ori %1,%0,2; mts rmsr,%1; nop; nop; mts rmsr,%0":"=r" (status), "=r" (mstatus));
-    #else
-            __asm__ volatile("pushfl; testl $0x200,(%%esp); jnz 0f; sti; nop; cli; 0: addl $4,%%esp\n":::"memory");
-    #endif
-  }*/
-
+un peu tricky : busy1 et busy2 ont la meme prio
+donc il se partage le processeur de maniere equitable
+mais busy2 change la prio de busy1 puis passe en mode zombie et rend
+la main a test4 qui tue busy1
+*/
 
     int busy1(void *arg)
     {
@@ -86,5 +78,3 @@
 
             return 0;
     }
-
-    #endif
