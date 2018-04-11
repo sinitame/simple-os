@@ -29,7 +29,7 @@
 
     int test5(void *arg)
     {
-            int pid1, pid2=1;
+            int pid1, pid2;
             int r;
 
             (void)arg;
@@ -51,7 +51,7 @@
             pid1 = start(no_run, STACK_LENGTH, 64, "no_run", 0); //version aprenti
             assert(pid1 > 0);
             // pid2 = start("waiter", 4000, 65, (void *)pid1); //version 2A
-            pid1 = start(waiter, STACK_LENGTH, 64, "waiter", (void *)pid1); //version aprenti
+            pid2 = start(waiter, STACK_LENGTH, 64, "waiter", (void *)pid1); //version aprenti
 
 
             assert(pid2 > 0);
