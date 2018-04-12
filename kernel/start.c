@@ -25,7 +25,8 @@ void kernel_start(void)
 	// start(test2, STACK_LENGTH, 128, "test2", (void *) 77);
 	// start(test3, STACK_LENGTH, 128, "test3", (void *) 77);
 	// start(test4, STACK_LENGTH, 128, "test4", (void *) 77);
-	start(test5, STACK_LENGTH, 128, "test5", (void *) 77);
+	// start(test5, STACK_LENGTH, 128, "test5", (void *) 77);
+	start(test6, STACK_LENGTH, 128, "test6", (void *) 77);
 
 	// start(killer, STACK_LENGTH, 128, "killer", (void *) 0);
 

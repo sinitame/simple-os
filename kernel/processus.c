@@ -70,10 +70,12 @@ void init(int pid, const char* nom, unsigned long ssize,int prio, int (*processu
 }
 
 int start(int(*code)(void*), unsigned long ssize, int prio, const char * nom, void *arg){
-	for (int futur_pid=0; futur_pid<NBPROC; futur_pid++){
-		if (table_processus[futur_pid] == NULL){
-			init(futur_pid,nom,ssize,prio,code, arg);
-			return futur_pid;
+	if (ssize <= (unsigned long)2<<30) {
+		for (int futur_pid=0; futur_pid<NBPROC; futur_pid++){
+			if (table_processus[futur_pid] == NULL){
+				init(futur_pid,nom,ssize,prio,code, arg);
+				return futur_pid;
+			}
 		}
 	}
 
@@ -194,15 +196,14 @@ void manage_childlist(Processus *P) {
 		while (child != NULL && child->pid != P->pid) {
 			child=child->suiv;
 		}
-		// un seul fils
-		if (child->suiv==NULL && child->prec==NULL) {
-			P->pere->child=NULL;
+		// suppression de la tete
+		if (child->prec==NULL) {
+			P->pere->child=child->suiv;
+		} else {
+			child->prec->suiv=child->suiv;
 		}
 		if (child->suiv != NULL) {
 			child->suiv->prec=child->prec;
-		}
-		if (child->prec != NULL) {
-			child->prec->suiv=child->suiv;
 		}
 	}
 }
