@@ -39,7 +39,7 @@
             assert(chprio(getpid(), 0) < 0);
             assert(getprio(getpid()) == 128);
             // pid1 = start("no_run", 4000, 64, 0); //version 2A
-            pid1 = start(no_run, STACK_LENGTH, 64, "no_run", 0); //version aprenti
+            pid1 = start(no_run, 4000, 64, "no_run", 0); //version aprenti
             assert(pid1 > 0);
             assert(kill(pid1) == 0);
             assert(kill(pid1) < 0); //pas de kill de zombie
@@ -48,10 +48,10 @@
             assert(waitpid(pid1, 0) == pid1);
             assert(waitpid(pid1, 0) < 0);
             // pid1 = start("no_run", 4000, 64, 0); //version 2A
-            pid1 = start(no_run, STACK_LENGTH, 64, "no_run", 0); //version aprenti
+            pid1 = start(no_run, 4000, 64, "no_run", 0); //version aprenti
             assert(pid1 > 0);
             // pid2 = start("waiter", 4000, 65, (void *)pid1); //version 2A
-            pid2 = start(waiter, STACK_LENGTH, 92, "waiter", (void *)pid1); //version aprenti
+            pid2 = start(waiter, 4000, 92, "waiter", (void *)pid1); //version aprenti
             assert(pid2 > 0);
             assert(waitpid(pid2, &r) == pid2);
             assert(r == 1);

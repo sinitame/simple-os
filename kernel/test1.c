@@ -31,7 +31,7 @@ int test1(void *arg)
 
     (void)arg;
 
-    pid1 = start(dummy1, STACK_LENGTH, 192, "dummy1", (void *) DUMMY_VAL);
+    pid1 = start(dummy1, 4000, 192, "dummy1", (void *) DUMMY_VAL);
     assert(pid1 > 0);
     printf("2 ");
     r = waitpid(pid1, &rval);
@@ -39,7 +39,7 @@ int test1(void *arg)
     assert(rval == 3);
     printf("3 ");
 
-    pid1 = start(dummy2, STACK_LENGTH, 100, "dummy2", (void *) (DUMMY_VAL + 1));
+    pid1 = start(dummy2, 4000, 100, "dummy2", (void *) (DUMMY_VAL + 1));
     assert(pid1 > 0);
     printf("4 ");
     r = waitpid(pid1, &rval);

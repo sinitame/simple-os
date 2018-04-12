@@ -57,9 +57,9 @@ la main a test4 qui tue busy1
             (void)args;
 
             assert(getprio(getpid()) == 128);
-            pid1 = start(busy1, STACK_LENGTH, 64, "busy1", (void *) arg);
+            pid1 = start(busy1, 4000, 64, "busy1", (void *) arg);
             assert(pid1 > 0);
-            pid2 = start(busy2, STACK_LENGTH, 64, "busy2", (void *) pid1);
+            pid2 = start(busy2, 4000, 64, "busy2", (void *) pid1);
             assert(pid2 > 0);
             printf("1 -");
             r = chprio(getpid(), 32);

@@ -37,7 +37,7 @@
             (void)arg;
 
             assert(getprio(getpid()) == 128);
-            pid1 = start(prio4, STACK_LENGTH, p, "prio4",  (void *) p);
+            pid1 = start(prio4, 4000, p, "prio4",  (void *) p);
             assert(pid1 > 0);
             printf(" 2");
             r = chprio(getpid(), 32);
@@ -50,7 +50,7 @@
             printf(" 6");
 
             assert(getprio(getpid()) == 128);
-            pid1 = start(prio5, STACK_LENGTH, p, "prio5", (void *) p);
+            pid1 = start(prio5, 4000, p, "prio5", (void *) p);
             assert(pid1 > 0);
             printf(" 8");
             r = kill(pid1);

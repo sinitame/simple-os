@@ -29,7 +29,7 @@
             (void)arg;
 
             printf("1");
-            pid1 = start(procKill, STACK_LENGTH, 100, "procKill", (void *) val);
+            pid1 = start(procKill, 4000, 100, "procKill", (void *) val);
             assert(pid1 > 0);
             printf(" 2");
             r = kill(pid1);
@@ -39,7 +39,7 @@
             assert(rval == 0);
             assert(r == pid1);
             printf(" 4");
-            pid1 = start(procExit, STACK_LENGTH, 192, "procExit", (void *) val);
+            pid1 = start(procExit, 4000, 192, "procExit", (void *) val);
             assert(pid1 > 0);
             printf(" 6");
             r = waitpid(pid1, &rval);

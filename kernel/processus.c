@@ -40,16 +40,19 @@ void init(int pid, const char* nom, unsigned long ssize,int prio, int (*processu
 	//Création du nouveau processus
 	table_processus[pid] = malloc(sizeof(Processus));
 	Processus *P = table_processus[pid];
+	P->pile=malloc(ssize*sizeof(int));
 	P->pid = pid;
 	P->pere = processus_actif;
 	P->prio = prio;
 	P->child = NULL;
 	strcpy(P->nom,nom);
 	P->etat = activable;
-	P->registres[esp] = (uint32_t)((P->pile)+STACK_LENGTH-3);
+
 	P->pile[ssize-3] = (uint32_t)processus;
 	P->pile[ssize-2] = (uint32_t)exit;
 	P->pile[ssize-1] = (uint32_t)arg;
+	P->registres[esp] = (uint32_t)((P->pile) +ssize-3);
+
 	P->reveil = 0;
 
 	//Ajout du processus à la file des processus
@@ -70,10 +73,10 @@ void init(int pid, const char* nom, unsigned long ssize,int prio, int (*processu
 }
 
 int start(int(*code)(void*), unsigned long ssize, int prio, const char * nom, void *arg){
-	if (ssize <= (unsigned long)2<<30) {
+	if (ssize < (unsigned long)(STACK_LENGTH)-512) {
 		for (int futur_pid=0; futur_pid<NBPROC; futur_pid++){
 			if (table_processus[futur_pid] == NULL){
-				init(futur_pid,nom,ssize,prio,code, arg);
+				init(futur_pid,nom,ssize+512,prio,code, arg);
 				return futur_pid;
 			}
 		}
@@ -103,6 +106,7 @@ void context_switch(Processus *prochain) {
 		// si l'ancien est mort, on le libere
 		if (ancien->etat==mort) {
 			table_processus[ancien->pid]=NULL;
+			free(ancien->pile);
 			free(ancien);
 		}
 		processus_actif = prochain;
@@ -221,6 +225,7 @@ void manage_children(Processus *P){
 		tmp = child->suiv;
 		// si on tombe sur un zombie, il doit etre detruit car aucun pere ne l'attendra
 		if (child->etat == zombie){
+			free(child->pile);
 			free(child);
 		// sinon il n'y a plus de pointeur sur le pere
 		} else {
@@ -236,6 +241,7 @@ int destroy_child(Processus *child, int *retvalp) {
 	// on l'enleve de la liste des fils de son pere
 	manage_childlist(child);
 	// enfin on libere le pid
+	free(child->pile);
 	free(child);
 	return pid;
 }
