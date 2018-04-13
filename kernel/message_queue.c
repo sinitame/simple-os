@@ -87,8 +87,9 @@ int pdelete(int fid) {
     while (tab_message_queues[fid]->nb_b_c>0) {
       proc=queue_out(&tab_message_queues[fid]->blocked_consumers, File_priorite, chaine);
       enable_delete_reset[fid]++;
-      table_processus[proc->val]->etat=activable;
-      queue_add(table_processus[proc->val], &file_processus,Processus,lien,prio);
+      if (table_processus[proc->val]!=NULL) {
+	table_processus[proc->val]->etat=activable;
+      }
       tab_message_queues[fid]->nb_b_c--;
     }
   }
@@ -101,8 +102,9 @@ int pdelete(int fid) {
       File_priorite *proc;
       proc=queue_out(&tab_message_queues[fid]->blocked_producers, File_priorite, chaine);
       enable_delete_reset[fid]++;
-      table_processus[proc->val]->etat=activable;
-      queue_add(table_processus[proc->val], &file_processus,Processus,lien,prio);
+      if (table_processus[proc->val]!=NULL) {
+	table_processus[proc->val]->etat=activable;
+      }
       tab_message_queues[fid]->nb_b_p--;
     }
   }
@@ -156,13 +158,20 @@ int preceive(int fid,int *message) {
   tab_message_queues[fid]->nb_msg--;
   //s'il existe des processus producteurs bloqués
   if (!queue_empty(&tab_message_queues[fid]->blocked_producers)) {
-    //On récupére le processus bloqué le plus ancien
+    //On récupére le processus bloqué le plus prioritaire
     File_priorite *proc;
     proc=queue_out(&tab_message_queues[fid]->blocked_producers, File_priorite, chaine);
     //On décrément le nombre de processus producteurs bloqués
     tab_message_queues[fid]->nb_b_p--;
-    table_processus[proc->val]->etat=activable;
-    queue_add(table_processus[proc->val], &file_processus,Processus,lien,prio);
+    //On vérifie si le processus est tué
+    while (table_processus[proc->val]==NULL && tab_message_queues[fid]->nb_b_p!=0) {
+      proc=queue_out(&tab_message_queues[fid]->blocked_producers, File_priorite, chaine);
+      //On décrément le nombre de processus producteurs bloqués
+      tab_message_queues[fid]->nb_b_p--;
+    }
+    if (table_processus[proc->val]!=NULL) {
+      table_processus[proc->val]->etat=activable;
+    }
     ordonnancement();
   }
   return 0;
@@ -191,8 +200,9 @@ int preset(int fid) {
     while (tab_message_queues[fid]->nb_b_c>0) {
       proc=queue_out(&tab_message_queues[fid]->blocked_consumers, File_priorite, chaine);
       enable_delete_reset[fid]++;
-      table_processus[proc->val]->etat=activable;
-      queue_add(table_processus[proc->val], &file_processus,Processus,lien,prio);
+      if (table_processus[proc->val]!=NULL) {
+	table_processus[proc->val]->etat=activable;
+      }
       tab_message_queues[fid]->nb_b_c--;
     }
   }
@@ -205,8 +215,9 @@ int preset(int fid) {
       File_priorite *proc;
       proc=queue_out(&tab_message_queues[fid]->blocked_producers, File_priorite, chaine);
       enable_delete_reset[fid]++;
-      table_processus[proc->val]->etat=activable;
-      queue_add(table_processus[proc->val], &file_processus,Processus,lien,prio);
+      if (table_processus[proc->val]!=NULL) {
+	table_processus[proc->val]->etat=activable;
+      }
       tab_message_queues[fid]->nb_b_p--;
     }
   }
@@ -259,13 +270,20 @@ int psend(int fid, int message){
   tab_message_queues[fid]->nb_msg++;
   //s'il existe des processus consomatteurs bloqués
   if (tab_message_queues[fid]->nb_b_c!=0) {
-    //On récupére le processus bloqué le plus ancien parmi les plus prioritaires
+    //On récupére le processus bloqué le plus prioritaire
     File_priorite *proc;
     proc=queue_out(&tab_message_queues[fid]->blocked_consumers, File_priorite, chaine);
-    //On décrément le nombre de processus consomatteurs bloqués
+    //On décrément le nombre de processus producteurs bloqués
     tab_message_queues[fid]->nb_b_c--;
-    table_processus[proc->val]->etat=activable;
-    queue_add(table_processus[proc->val], &file_processus,Processus,lien,prio);
+    //On vérifie si le processus est tué
+    while (table_processus[proc->val]==NULL && tab_message_queues[fid]->nb_b_c!=0) {
+      proc=queue_out(&tab_message_queues[fid]->blocked_consumers, File_priorite, chaine);
+      //On décrément le nombre de processus producteurs bloqués
+      tab_message_queues[fid]->nb_b_c--;
+    }
+    if (table_processus[proc->val]!=NULL) {
+      table_processus[proc->val]->etat=activable;
+    }
     ordonnancement();
   }
   return 0;
