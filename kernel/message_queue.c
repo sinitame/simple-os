@@ -6,6 +6,7 @@
 
 int nb_queues=0;
 Message_queue *tab_message_queues[NBQUEUE]={NULL};
+int enable_delete_reset[NBQUEUE]={0};
 
 int pcount(int fid, int *count) {
   //si fid est invalide
@@ -30,7 +31,7 @@ int pcount(int fid, int *count) {
 
 int pcreate(int count) {
   //s'il reste plus de files de messages ou le nombre count est négative ou égale à zéro
-  if (nb_queues>=NBQUEUE || count<=0) {
+  if (nb_queues>=NBQUEUE || count<=0 || count>50) {
     return -1;
   }
 
@@ -59,6 +60,7 @@ int pcreate(int count) {
   INIT_LIST_HEAD(&(tab_message_queues[fid]->messages));
   //Incrémenter le nombre de files de messages utilisés
   nb_queues++;
+  enable_delete_reset[fid]=0;
   return fid;
 }
 
@@ -70,32 +72,46 @@ int pdelete(int fid) {
   else if (tab_message_queues[fid]==NULL) {
     return -1;
   }
-  //Parcourir la file de messages
-  File_priorite *curr_element;
-  queue_for_each(curr_element, &tab_message_queues[fid]->messages, File_priorite, chaine) {
-    //supprimer tous les messages dans la file
-    queue_del(curr_element, chaine);
-    mem_free(curr_element, sizeof(File_priorite));
+  File_priorite *proc;
+  int pid_proc_c=0, pid_proc_p=0;
+  //supprimer les messages
+  while (tab_message_queues[fid]->nb_msg>0) {
+    queue_out(&tab_message_queues[fid]->messages, File_priorite, chaine);
+    tab_message_queues[fid]->nb_msg--;
   }
-  //Parcourir la file des processus consommateurs
-  queue_for_each(curr_element, &tab_message_queues[fid]->blocked_consumers, File_priorite, chaine) {
-    //Supprimer les élements de la file
-    queue_del(curr_element, chaine);
-    //Libérer les processus consommateurs
-    table_processus[curr_element->val]->etat=activable;
-    mem_free(curr_element,sizeof(File_priorite));
+  //S'il existe des consomatteurs bloqués
+  if (tab_message_queues[fid]->nb_b_c!=0) {
+    proc=queue_top(&tab_message_queues[fid]->blocked_consumers, File_priorite, chaine);
+    pid_proc_c=proc->val;
+    //Supprimer les processus consommateurs
+    while (tab_message_queues[fid]->nb_b_c>0) {
+      proc=queue_out(&tab_message_queues[fid]->blocked_consumers, File_priorite, chaine);
+      enable_delete_reset[fid]++;
+      table_processus[proc->val]->etat=activable;
+      queue_add(table_processus[proc->val], &file_processus,Processus,lien,prio);
+      tab_message_queues[fid]->nb_b_c--;
+    }
   }
-  //Parcourir la file des processus producteurs
-  queue_for_each(curr_element, &tab_message_queues[fid]->blocked_producers, File_priorite, chaine) {
-    //Supprimer les élements de la file
-    queue_del(curr_element, chaine);
-    //Libérer les processus producteurs
-    table_processus[curr_element->val]->etat=activable;
-    mem_free(curr_element,sizeof(File_priorite));
+  //S'il existe des producteuts bloqués
+  if (tab_message_queues[fid]->nb_b_p!=0) {
+    proc=queue_top(&tab_message_queues[fid]->blocked_producers, File_priorite, chaine);
+    pid_proc_p=proc->val;
+    //Supprimer les processus producteurs
+    while (tab_message_queues[fid]->nb_b_p>0) {
+      File_priorite *proc;
+      proc=queue_out(&tab_message_queues[fid]->blocked_producers, File_priorite, chaine);
+      enable_delete_reset[fid]++;
+      table_processus[proc->val]->etat=activable;
+      queue_add(table_processus[proc->val], &file_processus,Processus,lien,prio);
+      tab_message_queues[fid]->nb_b_p--;
+    }
   }
   mem_free(tab_message_queues[fid], sizeof(Message_queue));
   tab_message_queues[fid]=NULL;
   nb_queues--;
+  if (pid_proc_c>processus_actif->pid || pid_proc_p>processus_actif->pid) {
+    ordonnancement();
+  }
   return 0;
 }
 
@@ -122,28 +138,32 @@ int preceive(int fid,int *message) {
     table_processus[getpid()]->etat=wait_io;
     //passer la main au prochain processus
     ordonnancement();
+    if (enable_delete_reset[fid]>0) {
+      enable_delete_reset[fid]--;
+      return -2;
+    }
   }
   //s'il existe au moins un message dans la file
-    //On extrait le message le plus ancien dans la file et on le place dans "message"
-    File_priorite *msg;
-    msg=queue_bottom(&tab_message_queues[fid]->messages, File_priorite, chaine);
-    queue_del(msg, chaine);
-    if (message!=NULL) {
-      *message=msg->val;
-    }
-    mem_free(msg, sizeof(File_priorite));
-    //On décrément le nombre de messages dans la file
-    tab_message_queues[fid]->nb_msg--;
-    //s'il existe des processus producteurs bloqués
-    if (!queue_empty(&tab_message_queues[fid]->blocked_producers)) {
-      //On récupére le processus bloqué le plus ancien
-      File_priorite *proc;
-      proc=queue_out(&tab_message_queues[fid]->blocked_producers, File_priorite, chaine);
-      //On décrément le nombre de processus producteurs bloqués
-      tab_message_queues[fid]->nb_b_p--;
-      table_processus[proc->val]->etat=activable;
-      queue_add(table_processus[proc->val], &file_processus,Processus,lien,prio);
-      ordonnancement();
+  //On extrait le message le plus ancien dans la file et on le place dans "message"
+  File_priorite *msg;
+  msg=queue_bottom(&tab_message_queues[fid]->messages, File_priorite, chaine);
+  queue_del(msg, chaine);
+  if (message!=NULL) {
+    *message=msg->val;
+  }
+  mem_free(msg, sizeof(File_priorite));
+  //On décrément le nombre de messages dans la file
+  tab_message_queues[fid]->nb_msg--;
+  //s'il existe des processus producteurs bloqués
+  if (!queue_empty(&tab_message_queues[fid]->blocked_producers)) {
+    //On récupére le processus bloqué le plus ancien
+    File_priorite *proc;
+    proc=queue_out(&tab_message_queues[fid]->blocked_producers, File_priorite, chaine);
+    //On décrément le nombre de processus producteurs bloqués
+    tab_message_queues[fid]->nb_b_p--;
+    table_processus[proc->val]->etat=activable;
+    queue_add(table_processus[proc->val], &file_processus,Processus,lien,prio);
+    ordonnancement();
   }
   return 0;
 }
@@ -156,26 +176,42 @@ int preset(int fid) {
   else if (tab_message_queues[fid]==NULL) {
     return -1;
   }
-  //Parcourir la file de messages
-  File_priorite *curr_element;
-  queue_for_each(curr_element, &tab_message_queues[fid]->messages, File_priorite, chaine) {
-    //supprimer tous les messages dans la file
-    queue_del(curr_element, chaine);
-    mem_free(curr_element, sizeof(File_priorite));
+  File_priorite *proc;
+  int pid_proc_p=0, pid_proc_c=0;
+  //supprimer les messages
+  while (tab_message_queues[fid]->nb_msg>0) {
+    queue_out(&tab_message_queues[fid]->messages, File_priorite, chaine);
+    tab_message_queues[fid]->nb_msg--;
   }
-  //Parcourir la file des processus consommateurs
-  queue_for_each(curr_element, &tab_message_queues[fid]->blocked_consumers, File_priorite, chaine) {
-    //Supprimer les élements de la file
-    queue_del(curr_element, chaine);
-    table_processus[curr_element->val]->etat=activable;
-    mem_free(curr_element, sizeof(File_priorite));
+  //S'il existe des consomatteurs bloqués
+  if (tab_message_queues[fid]->nb_b_c!=0) {
+    proc=queue_top(&tab_message_queues[fid]->blocked_consumers, File_priorite, chaine);
+    pid_proc_c=proc->val;
+    //Supprimer les processus consommateurs
+    while (tab_message_queues[fid]->nb_b_c>0) {
+      proc=queue_out(&tab_message_queues[fid]->blocked_consumers, File_priorite, chaine);
+      enable_delete_reset[fid]++;
+      table_processus[proc->val]->etat=activable;
+      queue_add(table_processus[proc->val], &file_processus,Processus,lien,prio);
+      tab_message_queues[fid]->nb_b_c--;
+    }
   }
-  //Parcourir la file des processus producteurs
-  queue_for_each(curr_element, &tab_message_queues[fid]->blocked_producers, File_priorite, chaine) {
-    //Supprimer les élements de la file
-    queue_del(curr_element, chaine);
-    table_processus[curr_element->val]->etat=activable;
-    mem_free(curr_element, sizeof(File_priorite));
+  //S'il existe des producteuts bloqués
+  if (tab_message_queues[fid]->nb_b_p!=0) {
+    proc=queue_top(&tab_message_queues[fid]->blocked_producers, File_priorite, chaine);
+    pid_proc_p=proc->val;
+    //Supprimer les processus producteurs
+    while (tab_message_queues[fid]->nb_b_p>0) {
+      File_priorite *proc;
+      proc=queue_out(&tab_message_queues[fid]->blocked_producers, File_priorite, chaine);
+      enable_delete_reset[fid]++;
+      table_processus[proc->val]->etat=activable;
+      queue_add(table_processus[proc->val], &file_processus,Processus,lien,prio);
+      tab_message_queues[fid]->nb_b_p--;
+    }
+  }
+  if (pid_proc_c>processus_actif->pid || pid_proc_p>processus_actif->pid) {
+    ordonnancement();
   }
   return 0;
 }
@@ -201,32 +237,36 @@ int psend(int fid, int message){
     // On met le processus en attente
     table_processus[getpid()]->etat=wait_io;
     ordonnancement();
+    if (enable_delete_reset[fid]>0) {
+      enable_delete_reset[fid]--;
+      return -2;
+    }
   }
   // Si la file de messages n'est pas pleine
-    File_priorite *nv_msg;
-    nv_msg=mem_alloc(sizeof(File_priorite));
-    nv_msg->val=message;
-    if (queue_empty(&tab_message_queues[fid]->messages)!=0) {
-      nv_msg->prio=0;
-    }
-    else {
-      File_priorite *msg;
-      msg=queue_top(&tab_message_queues[fid]->messages, File_priorite, chaine);
-      nv_msg->prio=msg->prio+1;
-    }
-    queue_add(nv_msg, &(tab_message_queues[fid]->messages), File_priorite, chaine, prio);
-    //incrément du nombre de messages dans la file
-    tab_message_queues[fid]->nb_msg++;
-    //s'il existe des processus consomatteurs bloqués
-    if (tab_message_queues[fid]->nb_b_c!=0) {
-      //On récupére le processus bloqué le plus ancien parmi les plus prioritaires
-      File_priorite *proc;
-      proc=queue_out(&tab_message_queues[fid]->blocked_consumers, File_priorite, chaine);
-      //On décrément le nombre de processus consomatteurs bloqués
-      tab_message_queues[fid]->nb_b_c--;
-      table_processus[proc->val]->etat=activable;
-      queue_add(table_processus[proc->val], &file_processus,Processus,lien,prio);
-      ordonnancement();
+  File_priorite *nv_msg;
+  nv_msg=mem_alloc(sizeof(File_priorite));
+  nv_msg->val=message;
+  if (queue_empty(&tab_message_queues[fid]->messages)!=0) {
+    nv_msg->prio=0;
+  }
+  else {
+    File_priorite *msg;
+    msg=queue_top(&tab_message_queues[fid]->messages, File_priorite, chaine);
+    nv_msg->prio=msg->prio+1;
+  }
+  queue_add(nv_msg, &(tab_message_queues[fid]->messages), File_priorite, chaine, prio);
+  //incrément du nombre de messages dans la file
+  tab_message_queues[fid]->nb_msg++;
+  //s'il existe des processus consomatteurs bloqués
+  if (tab_message_queues[fid]->nb_b_c!=0) {
+    //On récupére le processus bloqué le plus ancien parmi les plus prioritaires
+    File_priorite *proc;
+    proc=queue_out(&tab_message_queues[fid]->blocked_consumers, File_priorite, chaine);
+    //On décrément le nombre de processus consomatteurs bloqués
+    tab_message_queues[fid]->nb_b_c--;
+    table_processus[proc->val]->etat=activable;
+    queue_add(table_processus[proc->val], &file_processus,Processus,lien,prio);
+    ordonnancement();
   }
   return 0;
 }

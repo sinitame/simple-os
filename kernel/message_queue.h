@@ -3,7 +3,7 @@
 
 #include "queue.h"
 
-#define NBQUEUE 1
+#define NBQUEUE 10
 
 struct file_priorite {
   int val;
@@ -30,6 +30,7 @@ typedef struct message_queue Message_queue;
 
 extern int nb_queues;
 extern Message_queue *tab_message_queues[NBQUEUE];
+extern int enable_delete_reset[NBQUEUE];
 
 int pcount(int fid, int *count);
 int pcreate(int count);
