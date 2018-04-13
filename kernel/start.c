@@ -28,7 +28,7 @@ void kernel_start(void)
 	// start(test5, 4000, 128, "test5", (void *) 77);
 	start(test6, 4000, 128, "test6", (void *) 77);
 
-	// start(killer, STACK_LENGTH, 128, "killer", (void *) 0);
+	// start(killer, 4000, 128, "killer", (void *) 0);
 
 	idle();
 

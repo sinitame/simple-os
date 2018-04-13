@@ -73,10 +73,10 @@ void init(int pid, const char* nom, unsigned long ssize,int prio, int (*processu
 }
 
 int start(int(*code)(void*), unsigned long ssize, int prio, const char * nom, void *arg){
-	if (ssize < (unsigned long)(STACK_LENGTH)-512) {
+	if (ssize < (unsigned long)(1<<31)) {
 		for (int futur_pid=0; futur_pid<NBPROC; futur_pid++){
 			if (table_processus[futur_pid] == NULL){
-				init(futur_pid,nom,ssize+512,prio,code, arg);
+				init(futur_pid,nom,STACK_KERNEL,prio,code, arg);
 				return futur_pid;
 			}
 		}
@@ -85,7 +85,19 @@ int start(int(*code)(void*), unsigned long ssize, int prio, const char * nom, vo
 	return -1;
 }
 
-
+/*
+Test si un processus est bien dans la pile
+queue_del provoque un trap14 si le processus n'y est pas
+*/
+int is_in_queue(Processus *elem, link *head) {
+	Processus *ptr_elem;
+	queue_for_each_prev(ptr_elem, head, Processus, lien) {
+		if (elem==ptr_elem) {
+			return 0;
+		}
+	}
+	return -1;
+}
 
 void idle(void)
 {
