@@ -1,7 +1,6 @@
     #include "stdio.h"
-    #include "tests.h"
     #include "processus.h"
-    #include "../user/tests/lib/it.c"
+    #include "test4.h"
 
 /*
 un peu tricky : busy1 et busy2 ont la meme prio
@@ -9,6 +8,8 @@ donc il se partage le processeur de maniere equitable
 mais busy2 change la prio de busy1 puis passe en mode zombie et rend
 la main a test4 qui tue busy1
 */
+
+extern void test_it(void);
 
     int busy1(void *arg)
     {

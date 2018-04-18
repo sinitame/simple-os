@@ -4,16 +4,12 @@
  * Creation de processus se suicidant en boucle. Test de la vitesse de creation
  * de processus.
  ******************************************************************************/
-#ifdef _TEST8_H_
 
     #include <stdio.h>
     #include "processus.h"
     #include "div64.h"
-    #include "tests.h"
-    #include "../user/tests/lib/it.c"
 
-
-
+extern void test_it(void);
 
     int suicide(void *arg)
     {
@@ -68,5 +64,3 @@
             printf("%lu cycles/process.\n", (unsigned long)div64(tsc2 - tsc1, 2 * (unsigned)count));
             return 0;
     }
-
-#endif
