@@ -9,7 +9,8 @@
 
 #define NBPROC 10
 #define MAXPRIO 256
-#define STACK_LENGTH 1<<31
+
+#define STACK_KERNEL 1024	// taille mini de 1ko
 
 enum registre_type{ebx=0,esp=1,ebp=2,esi=3,edi=4}; //index du tableau
 enum etats {actif,activable,wait_sem,wait_io,wait_child,endormi,zombie,mort};
