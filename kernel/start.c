@@ -6,15 +6,15 @@
 #include <start.h>
 #include "../user/lib/clock.h"
 #include "processus.h"
-#include "message_queue.h"
-#include "test12.h"
+// #include "test12.h"
+// #include "test14.h"
+#include "test15.h"
 
 void kernel_start(void)
 {
 
 
 	efface_ecran();
-	printf("Début tests file de messages !\n");
 
 		clk();
 	masque_IRQ(0,0);
@@ -23,7 +23,7 @@ void kernel_start(void)
 	init_idle();
 
 	//test12(0);
-	start(test12, 4000, 128, "test1", (void *) 77);
+	start(test15, 4000, 128, "test15", (void *) 77);
 
 
 	while(1)
