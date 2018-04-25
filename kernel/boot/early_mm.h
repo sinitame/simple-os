@@ -17,3 +17,12 @@ void early_mm_check(void);
  * Create kernel initial memory mapping.
  */
 void early_mm_map_kernel(void);
+void early_mm_fill_pgdir(unsigned pagedir[],
+                                unsigned pagetab[],
+                                unsigned count);
+
+
+void early_mm_map_region(unsigned *pdir,
+                            unsigned start,
+                            unsigned end,
+                            unsigned flags);
