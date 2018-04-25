@@ -4,6 +4,7 @@
 #include <processus.h>
 #include <string.h>
 #include "../shared/malloc.c"
+#include "early_mm.h"
 
 extern void ctx_sw(int*,int*);
 extern int read_eax();
