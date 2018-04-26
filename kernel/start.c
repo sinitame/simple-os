@@ -17,7 +17,9 @@ void kernel_start(void)
 
 	clk();
 	masque_IRQ(0,0);
+	masque_IRQ(1,0);
 	init_traitant_IT(32, traitant_IT_32);
+	init_traitant_IT(33, traitant_IT_33);
 
 	efface_ecran();
 	init_idle();
