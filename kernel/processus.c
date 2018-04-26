@@ -328,3 +328,19 @@ void wait_clock(uint32_t nbr_secs){
 	processus_actif->etat = endormi;
 	ordonnancement();
 }
+
+hash_t* create_hash() {
+  hash_t *map=mem_alloc(sizeof(hash_t));
+  hash_init_string(map);
+  int i=0;
+  const char* key=mem_alloc(sizeof(key));
+  void* value;
+  while ((symbols_table + i)->name!=NULL) {
+    key = (symbols_table + i)->name;
+    value = (symbols_table + i)->start;
+    hash_set(map, (char*) key, value);
+    i++;
+  }
+  return map;
+}
+
