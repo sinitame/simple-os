@@ -142,7 +142,7 @@ extern unsigned pgtab[];
  * @param pgtab the age table to reference.
  * @param count number of entry to fill.
  */
-static void early_mm_fill_pgdir(unsigned pagedir[],
+void early_mm_fill_pgdir(unsigned pagedir[],
                                 unsigned pagetab[],
                                 unsigned count)
 {
@@ -169,7 +169,7 @@ static void early_mm_fill_pgdir(unsigned pagedir[],
  * @pre start and end have to be aligned on 4K.
  *      pagedir must be initialized.
  */
-static void early_mm_map_region(unsigned *pdir,
+void early_mm_map_region(unsigned *pdir,
                                 unsigned start,
                                 unsigned end,
                                 unsigned flags)
@@ -221,4 +221,3 @@ void early_mm_map_kernel(void)
         /* Zone 6: free memory is read/write */
         early_mm_map_region(pgdir, (unsigned)_end, (unsigned)mem_end, PAGE_TABLE_RW);
 }
-

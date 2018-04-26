@@ -39,7 +39,6 @@ void kernel_start(void)
 	start(test12, 4000, 128, "test12", (void *) 77);
 	start(test14, 4000, 128, "test14", (void *) 77);
 	start(test15, 4000, 128, "test15", (void *) 77);
-
 	start(killer, 4000, 128, "killer", (void *) 0);
 
 	idle();*/
