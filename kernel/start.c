@@ -7,6 +7,7 @@
 #include "../shared/stddef.h"
 #include "../shared/console.h"
 #include "../user/lib/clock.h"
+#include "../user/lib/interruptions.h"
 #include "processus.h"
 
 #include "tests.h"
