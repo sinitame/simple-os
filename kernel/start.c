@@ -3,6 +3,7 @@
 
 #include "cpu.h"
 #include "stdio.h"
+#include "kbd.h"
 
 #include "../shared/stddef.h"
 #include "../shared/console.h"
@@ -20,6 +21,7 @@ void kernel_start(void)
 	masque_IRQ(1,0);
 	init_traitant_IT(32, traitant_IT_32);
 	init_traitant_IT(33, traitant_IT_33);
+	init_buff(&stdin,5);
 
 	efface_ecran();
 	init_idle();

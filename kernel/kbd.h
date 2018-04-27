@@ -22,6 +22,21 @@
 #ifndef __KBD_H__
 #define __KBD_H__
 
+
+typedef struct Buffer {
+    int r;
+    int w;
+    int taille;
+    char *buffer;
+} buffer_clavier;
+
+extern buffer_clavier stdin;
+int init_buff(buffer_clavier * buf, int taille);
+int empty_buff(buffer_clavier * buf);
+int full_buff(buffer_clavier *buf);
+int add_buff(buffer_clavier *buf, char c);
+int get_buffer(buffer_clavier *buf, char * c);
+
 void tic_CLAVIER(void);
 
 /* Call this function for each scancode received to translate them to
@@ -35,5 +50,7 @@ void keyboard_data(char *str);
 /* You may implement this function to keep keyboard LEDs in sync with the
 state of the keyboard driver (do_scancode). */
 void kbd_leds(unsigned char leds);
+
+
 
 #endif
