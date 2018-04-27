@@ -1,4 +1,4 @@
-	#include <cpu.h>
+#include <cpu.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <processus.h>
@@ -8,44 +8,8 @@
 
 extern void ctx_sw(int*,int*);
 extern int read_eax();
-extern void enable_paging();
+extern unsigned pgdir[];
 
-/* Real mode memory region */
-#define FIRST_PAGE      0x00000000u
-#define RM_START        FIRST_PAGE + 0x1000u
-
-/* Kernel start */
-extern char _start[];
-
-/* .text section, ctr0.S excluded */
-extern char _text_start[];
-extern char _text_end[];
-
-/* .multiboot section */
-extern char _multiboot_start[];
-extern char _multiboot_end[];
-
-/* .bootstrap_stack section */
-extern char _bootstrap_stack_start[];
-extern char _bootstrap_stack_end[];
-
-/* .rodata section */
-extern char _rodata_start[];
-extern char _rodata_end[];
-
-/* .data section */
-extern char _data_start[];
-extern char _data_end[];
-
-/* .bss section */
-extern char _bss_start[];
-extern char _bss_end[];
-
-/* End of kernel binary */
-extern char _end[];
-
-/* End of supported memory */
-extern char mem_end[];
 
 #define PAGE_TABLE_RO      0x000000001u
 #define PAGE_TABLE_RW      0x000000003u
@@ -98,30 +62,14 @@ void init(int pid, const char* nom, unsigned long ssize,int prio, int (*processu
 	P->registres[esp] = (uint32_t)((P->pile) +ssize-3);
 
 	P->reveil = 0;
-  P->pgdir =  mem_alloc(sizeof(unsigned));
-	P->pgtab =  mem_alloc(sizeof(unsigned));
-	enable_paging();
-	memset(P->pgtab, 0, 4096*64);
+  P->pgdir =  mem_alloc(1024*4);
+	P->pgtab =  mem_alloc(1024*4);
 
-	early_mm_fill_pgdir(P->pgdir, P->pgtab, 64);
 
 	P->pgtab[0] = 0;
-
-	/* Zone 2: map read/write. */
-	early_mm_map_region(P->pgdir, 4096, (unsigned)_start, PAGE_TABLE_RW);
-	/* Zone 3: crt0.S mapped read/write for paging structures*/
-	early_mm_map_region(P->pgdir, (unsigned)_start, (unsigned)_text_start, PAGE_TABLE_RW);
-	/* Zone 4: .text, .rodata and .multiboot sections are obviously read only */
-	early_mm_map_region(P->pgdir, (unsigned)_text_start, (unsigned)_text_end, PAGE_TABLE_RO);
-	early_mm_map_region(P->pgdir, (unsigned)_multiboot_start, (unsigned)_multiboot_end, PAGE_TABLE_RO);
-	early_mm_map_region(P->pgdir, (unsigned)_rodata_start, (unsigned)_rodata_end, PAGE_TABLE_RO);
-	/* Except first stack which is RW */
-	early_mm_map_region(P->pgdir, (unsigned)_bootstrap_stack_start, (unsigned)_bootstrap_stack_end, PAGE_TABLE_RW);
-	/* Zone 5: .data and .bss are read/write */
-	early_mm_map_region(P->pgdir, (unsigned)_data_start, (unsigned)_data_end, PAGE_TABLE_RW);
-	early_mm_map_region(P->pgdir, (unsigned)_bss_start, (unsigned)_bss_end, PAGE_TABLE_RW);
-	/* Zone 6: free memory is read/write */
-	early_mm_map_region(P->pgdir, (unsigned)_end, (unsigned)mem_end, PAGE_TABLE_RW);
+	for(int i=0; i<64;i++){
+		P->pgdir[i] = pgdir[i];
+	}
 
 
 
@@ -413,4 +361,3 @@ hash_t* create_hash() {
   }
   return map;
 }
-
