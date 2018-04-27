@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include "../shared/queue.h"
 #include "../user/lib/clock.h"
+#include "hash.h"
+#include "userspace_apps.h"
 
 #define NBPROC 10
 #define MAXPRIO 256
@@ -59,5 +61,6 @@ int getprio(int pid);
 int chprio(int pid, int newprio);
 int getpid(void);
 void wait_clock(uint32_t nbr_secs);
+hash_t* create_hash();
 
 #endif

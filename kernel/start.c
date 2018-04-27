@@ -10,11 +10,18 @@
 #include "processus.h"
 
 #include "tests.h"
+#include "userspace_apps.h"
+#include "hash.h"
 
 void kernel_start(void)
 {
+  efface_ecran();
+  hash_t *map=create_hash();
+  if (hash_isset(map, "psender")!=0) {
+      printf("app trouvé");
+    }
 
-	clk();
+  /*clk();
 	masque_IRQ(0,0);
 	init_traitant_IT(32, traitant_IT_32);
 
@@ -34,7 +41,7 @@ void kernel_start(void)
 	start(test15, 4000, 128, "test15", (void *) 77);
 	start(killer, 4000, 128, "killer", (void *) 0);
 
-	idle();
+	idle();*/
 
 	while(1)
 	  hlt();
