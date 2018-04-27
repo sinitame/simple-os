@@ -1,4 +1,4 @@
-#include <cpu.h>
+	#include <cpu.h>
 #include <inttypes.h>
 #include <stdio.h>
 #include <processus.h>
@@ -98,6 +98,10 @@ void init(int pid, const char* nom, unsigned long ssize,int prio, int (*processu
 	P->registres[esp] = (uint32_t)((P->pile) +ssize-3);
 
 	P->reveil = 0;
+  P->pgdir =  mem_alloc(sizeof(unsigned));
+	P->pgtab =  mem_alloc(sizeof(unsigned));
+	enable_paging();
+	memset(P->pgtab, 0, 4096*64);
 
 	early_mm_fill_pgdir(P->pgdir, P->pgtab, 64);
 
@@ -119,7 +123,6 @@ void init(int pid, const char* nom, unsigned long ssize,int prio, int (*processu
 	/* Zone 6: free memory is read/write */
 	early_mm_map_region(P->pgdir, (unsigned)_end, (unsigned)mem_end, PAGE_TABLE_RW);
 
-	enable_paging();
 
 
 	//Ajout du processus à la file des processus

@@ -36,8 +36,8 @@ struct Processus {
 	Processus *child;
 	Processus *prec;
 	Processus *suiv;
-	unsigned* pgdir;
-	unsigned* pgtab;
+	unsigned* pgdir ;
+	unsigned* pgtab ;
 };
 
 
