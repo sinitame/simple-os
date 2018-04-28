@@ -36,6 +36,9 @@ int empty_buff(buffer_clavier * buf);
 int full_buff(buffer_clavier *buf);
 int add_buff(buffer_clavier *buf, char c);
 int get_buffer(buffer_clavier *buf, char * c);
+unsigned long cons_read(char *string, unsigned long length);
+int cons_write(const char *str, long size);
+void cons_echo(int on);
 
 void tic_CLAVIER(void);
 

@@ -13,8 +13,8 @@
 
 int init_buff(buffer_clavier * buf, int taille)
 {
-    
-    buf->buffer = mem_alloc(taille * sizeof(char));
+
+    buf->buffer = mem_alloc(taille * sizeof(int));
     if(buf->buffer != NULL)
     {
         buf->taille = taille;
@@ -64,21 +64,55 @@ int get_buffer(buffer_clavier *buf, char * c){
     }
 }
 
+unsigned long cons_read(char *string, unsigned long length)
+{
+  char ascii_car;
+  unsigned long indice = 0;
+	if (length <= 0) {
+		return 0;
+	}
+
+
+	do {
+    if (!empty_buff(&stdin)){
+      get_buffer(&stdin,&ascii_car);
+  		if (ascii_car != 13) {
+  			string[indice] = ascii_car;
+        indice ++;
+      }
+    }
+
+	} while (ascii_car !=13 && indice < length);
+  return indice;
+
+}
+
+int cons_write(const char *str, long size){
+  int i;
+
+  if ((int)strlen(str) >= size){
+    for ( i=0; i<size;i++){
+      printf("%c",str[i]);
+    }
+    return 0;
+  } else{
+    return -1;
+  }
+}
+
+void cons_echo(int on){
+  on = !on;
+}
 
 void keyboard_data(char *str){
 
-
-  char data;
 
   printf("Codes ASCII de la touche : ");
     for (int i = 0; str[i] != '\0'; i++) {
         printf("%d ", str[i]);
         add_buff(&stdin, str[i]);
     }
-    if ((str[0] >= 32) && (str[0] < 127)) {
-        get_buffer(&stdin,&data);
-        printf(", caractère correspondant : '%c' ", data);
-    }
+
     printf("\n");
 
 
