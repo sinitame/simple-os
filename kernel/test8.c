@@ -8,8 +8,8 @@
     #include <stdio.h>
     #include "processus.h"
     #include "div64.h"
-
-extern void test_it(void);
+    
+    extern void test_it(void);
 
     int suicide(void *arg)
     {

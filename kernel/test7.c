@@ -5,10 +5,9 @@
  * Tentative de determination de la frequence du processeur et de la
  * periode de scheduling
  ******************************************************************************/
-#ifdef _TEST7_H_
 
     #ifdef TELECOM_TST
-    int main(void *arg)
+    int test7(void *arg)
     {
             (void)arg;
             printf("Test desactive pour les TELECOM.\n");
@@ -16,6 +15,13 @@
 
     #else
     #include <stdio.h>
+    #include "processus.h"
+    #include "hash.h"
+    #include "stddef.h"
+    #include "mem.h"
+
+    void* shm_acquire(const char *key);
+    extern void test_it();
 
     int sleep_pr1(void *arg)
     {
@@ -26,7 +32,7 @@
             return 1;
     }
 
-    int timer(void *arg)
+    int timer2(void *arg)
     {
             volatile unsigned long *timer = NULL;
             timer = shm_acquire("test7_shm");
@@ -61,10 +67,34 @@
             return 0;
     }
 
+    hash_t *map;
+
+    void *shm_create(const char *key) {
+        map = mem_alloc(sizeof(hash_t));
+        hash_init_string(map);
+        void* page=mem_alloc(4*1024);
+        if (!hash_set(map, (void*)key, page)) {
+            return page;
+        }
+        mem_free(page, 4*1024);
+        return NULL;
+    }
+
+    void *shm_acquire(const char *key) {
+        return hash_get(map, (void*)key, NULL);
+    }
+
+    void shm_release(const char *key) {
+            // TODO faux car la page peut encore etre pointee par des processus
+            // mais ok pour l'instant
+            hash_del(map, (void*)key);
+    }
 
     int test7(void *arg)
     {
-            int pid1, pid2, r;
+            int pid1;
+            int pid2;
+            int r;
             unsigned long c0, c, quartz, ticks, dur;
             volatile unsigned long *timer = NULL;
 
@@ -74,15 +104,15 @@
 
             assert(getprio(getpid()) == 128);
             printf("1");
-            pid1 = start("timer1", 4000, 129, 0);
+            pid1 = start(timer1, 4000, 129, "timer1", 0);
             assert(pid1 > 0);
             printf(" 3");
             assert(waitpid(-1, 0) == pid1);
-            printf(" 8 : ");
+            printf(" 8\n");
 
             *timer = 0;
-            pid1 = start("timer", 4000, 127, 0);
-            pid2 = start("timer", 4000, 127, 0);
+            pid1 = start(timer2, 4000, 127, "timer", 0);
+            pid2 = start(timer2, 4000, 127, "timer", 0);
             assert(pid1 > 0);
             assert(pid2 > 0);
             clock_settings(&quartz, &ticks);
@@ -99,14 +129,13 @@
             assert(kill(pid2) == 0);
             assert(waitpid(pid2, 0) == pid2);
             printf("%lu changements de contexte sur %lu tops d'horloge", *timer, dur);
-            pid1 = start("sleep_pr1", 4000, 192, 0);
+            pid1 = start(sleep_pr1, 4000, 192, "sleep_pr1", 0);
             assert(pid1 > 0);
             assert(kill(pid1) == 0);
             assert(waitpid(pid1, &r) == pid1);
             assert(r == 0);
             printf(".\n");
             shm_release("test7_shm");
+            return 0;
     }
     #endif
-
-#endif

@@ -1,7 +1,6 @@
     #include "stdio.h"
     #include "processus.h"
     #include "test4.h"
-
 /*
 un peu tricky : busy1 et busy2 ont la meme prio
 donc il se partage le processeur de maniere equitable
