@@ -21,12 +21,12 @@
  */
 #ifndef __KBD_H__
 #define __KBD_H__
-
+#include "processus.h"
 
 typedef struct Buffer {
-    int r;
-    int w;
-    int taille;
+    volatile int r;
+    volatile int w;
+    volatile int taille;
     char *buffer;
 } buffer_clavier;
 

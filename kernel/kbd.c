@@ -123,4 +123,5 @@ void tic_CLAVIER(void){
   outb(0x20,0x20);
   uint8_t code = inb(0x60);
   do_scancode((uint32_t)code);
+  ordonnancement();
 }

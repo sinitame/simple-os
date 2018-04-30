@@ -24,24 +24,23 @@ void kernel_start(void)
 	init_buff(&stdin,5);
 
 	efface_ecran();
+
 	init_idle();
-/*
-	char string[5];
-	while(1){
-		if (cons_read(string,4 ) == 4){
-			printf(string);
-			break;
-		}
-	}
-*/
+	sti();
+
+
 	// start(test1, 4000, 128, "test1", (void *) 77);
 	// start(test2, 4000, 128, "test2", (void *) 77);
 	// start(test3, 4000, 128, "test3", (void *) 77);
 	// start(test4, 4000, 128, "test4", (void *) 77);
 	// start(test5, 4000, 128, "test5", (void *) 77);
 	//start(test6, 4000, 128, "test6", (void *) 77);
+	start(test, 4000, 128, "test_cons_read", (void *) 77);
 
 	// start(killer, 4000, 128, "killer", (void *) 0);
+
+
+
 
 	idle();
 
