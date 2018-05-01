@@ -14,7 +14,7 @@
 #include "readcmd.h"
 #include "mem.h"
 #include "kbd.h"
-
+/*
 static void *xrealloc(void *ptr, size_t previous_size, size_t size)
 {
 	void *p = mem_alloc(size);
@@ -24,6 +24,7 @@ static void *xrealloc(void *ptr, size_t previous_size, size_t size)
 	mem_free(ptr, previous_size);
 	return p;
 }
+*/
 
 
 /* Read a line from standard input and put it in a char[] */
@@ -161,11 +162,11 @@ static char **split_in_words(char *line)
 			w = strdup(buf);
 		}
 		if (w) {
-			tab = xrealloc(tab,l* sizeof(char *), (l + 1) * sizeof(char *));
+			tab = xrealloc(tab ,(l + 1) * sizeof(char *));
 			tab[l++] = w;
 		}
 	}
-	tab = xrealloc(tab,l* sizeof(char *), (l + 1) * sizeof(char *));
+	tab = xrealloc(tab, (l + 1) * sizeof(char *));
 	tab[l++] = 0;
 	xfree(buf);
 	return tab;
@@ -215,11 +216,11 @@ char *get_cmd_name(char *cmd)
 			w = strdup(buf);
 		}
 		if (w) {
-			tab = xrealloc(tab,l* sizeof(char *), (l + 1) * sizeof(char *));
+			tab = xrealloc(tab,(l + 1) * sizeof(char *));
 			tab[l++] = w;
 		}
 	}
-	tab = xrealloc(tab,l* sizeof(char *), (l + 1) * sizeof(char *));
+	tab = xrealloc(tab,(l + 1) * sizeof(char *));
 	tab[l++] = 0;
 	xfree(buf);
 	return tab[l-2];
@@ -229,17 +230,17 @@ char *get_cmd_name(char *cmd)
 char **arguments(char **liste_mots){
 	char **arg = 0;
 	int l = 1;
-	arg = xrealloc(arg,sizeof(arg), sizeof(char *));
+	arg = xrealloc(arg, sizeof(char *));
 	arg[0] = get_cmd_name(liste_mots[0]);
 
 	while(liste_mots[l] != 0){
 		if (liste_mots[l]){
-			arg = xrealloc(arg,l* sizeof(char *),(l+1)*sizeof(char *));
+			arg = xrealloc(arg,(l+1)*sizeof(char *));
 			arg[l] = liste_mots[l];
 			l++;
 		}
 	}
-	arg = xrealloc(arg,l* sizeof(char *),(l+1)*sizeof(char *));
+	arg = xrealloc(arg,(l+1)*sizeof(char *));
 	arg[l++]=NULL;
 
 	return arg;
@@ -289,6 +290,7 @@ struct cmdline *parsecmd(char **pline)
 	char ***seq;
 	size_t cmd_len, seq_len;
 
+
 	if (line == NULL) {
 		if (s) {
 			xfreecmd(s);
@@ -305,6 +307,7 @@ struct cmdline *parsecmd(char **pline)
 	seq_len = 0;
 
 	words = split_in_words(line);
+
 	xfree(line);
 	*pline = NULL;
 
@@ -364,7 +367,7 @@ struct cmdline *parsecmd(char **pline)
 				goto error;
 			}
 
-			seq = xrealloc(seq, seq_len* sizeof(char **),(seq_len + 2) * sizeof(char **));
+			seq = xrealloc(seq, (seq_len + 2) * sizeof(char **));
 			seq[seq_len++] = cmd;
 			seq[seq_len] = 0;
 
@@ -373,14 +376,14 @@ struct cmdline *parsecmd(char **pline)
 			cmd_len = 0;
 			break;
 		default:
-			cmd = xrealloc(cmd,cmd_len* sizeof(char *), (cmd_len + 2) * sizeof(char *));
+			cmd = xrealloc(cmd,(cmd_len + 2) * sizeof(char *));
 			cmd[cmd_len++] = w;
 			cmd[cmd_len] = 0;
 		}
 	}
 
 	if (cmd_len != 0) {
-		seq = xrealloc(seq, seq_len* sizeof(char **),(seq_len + 2) * sizeof(char **));
+		seq = xrealloc(seq, (seq_len + 2) * sizeof(char **));
 		seq[seq_len++] = cmd;
 		seq[seq_len] = 0;
 	} else if (seq_len != 0) {

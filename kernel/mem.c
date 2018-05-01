@@ -16,6 +16,18 @@ void xfree(void *zone){
 	mem_free_nolength(zone);
 };
 
+void *xrealloc(void *ptr, size_t size){
+	void *p = mem_alloc(size);
+	if(ptr == NULL){
+		return p;
+	}
+
+	memcpy(p, ptr, size);
+
+	xfree(ptr);
+	return p;
+}
+
 
 /* Trivial sbrk implementation */
 void *sbrk(ptrdiff_t diff)

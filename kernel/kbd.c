@@ -78,7 +78,7 @@ int get_buffer(buffer_clavier *buf, char * c){
 
 unsigned long cons_read(char *string, unsigned long length)
 {
-  char ascii_car;
+  char ascii_car = '.';
   unsigned long indice = 0;
 	if (length <= 0) {
 		return 0;

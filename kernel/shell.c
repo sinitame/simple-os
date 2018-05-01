@@ -42,24 +42,27 @@ int shell(void *arg) {
 		   	can not be cleaned at the end of the program. Thus
 		   	one memory leak per command seems unavoidable yet */
 			line = readline(prompt);
-
+/*
 			if (line == 0 || ! strncmp(line,"exit", 4)) {
 				terminate(line);
 			}
-
+*/
 			//add_history(line);
 
 			/* parsecmd xfree line and set it up to 0 */
 			l = parsecmd( & line);
 
-			/* If input stream closed, normal termination */
+			printf("Commade:'%s', args: '%s', rin: %s, rout: '%s' \n", l->seq[0][0],l->seq[0][1],l->in,l->out);
+
+/*
+			// If input stream closed, normal termination
 			if (!l) {
 
 				terminate(0);
 			}
 
 
-/*
+
 			if (l->err) {
 				// Syntax error, read another command
 				printf("error: %s\n", l->err);
