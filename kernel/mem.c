@@ -12,6 +12,11 @@ extern char mem_heap[];
 extern char mem_heap_end[];
 static char *curptr = mem_heap;
 
+void xfree(void *zone){
+	mem_free(zone,sizeof(zone));
+};
+
+
 /* Trivial sbrk implementation */
 void *sbrk(ptrdiff_t diff)
 {
@@ -21,4 +26,3 @@ void *sbrk(ptrdiff_t diff)
 	curptr = c;
 	return s;
 }
-

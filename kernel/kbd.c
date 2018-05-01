@@ -10,6 +10,18 @@
 
 
 
+char *strdup(const char *src)
+{
+  char *str;
+	int len = strlen(src);
+	str = mem_alloc(len+1);
+  if (str) {
+    strcpy(str,src);
+  }
+  return str;
+
+
+}
 
 int init_buff(buffer_clavier * buf, int taille)
 {

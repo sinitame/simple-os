@@ -10,5 +10,7 @@
 
 void *mem_alloc(unsigned long length);
 void mem_free(void *zone, unsigned long length);
+void xfree(void *zone);
+
 
 #endif

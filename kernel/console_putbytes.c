@@ -112,7 +112,7 @@
  			place_curseur(curseur_lig,curseur_col+1);
  		}
  	}
- }
+}
 
  void console_putbytes(const char *chaine, int taille){
  	int i;
