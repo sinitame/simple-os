@@ -21,6 +21,7 @@ soit les semaphores
 #include "test10.h"
 #include "test11.h"
 #include "test12.h"
+#include "test13.h"
 #include "test14.h"
 #include "test15.h"
 
