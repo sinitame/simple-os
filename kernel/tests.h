@@ -1,6 +1,5 @@
 /*
-Les tests 7, 9, 10, 11, 13 utilisent soit la memoire virtuelle,
-soit les semaphores
+Les tests 10 et 11 utilisent les semaphores
 */
 
 #ifndef TESTS_H
@@ -18,12 +17,13 @@ soit les semaphores
 #include "test7.h"
 #include "test8.h"
 #include "test9.h"
-#include "test10.h"
-#include "test11.h"
+// #include "test10.h"
+// #include "test11.h"
 #include "test12.h"
 #include "test13.h"
 #include "test14.h"
 #include "test15.h"
+#include "test16.h"
 
 #include "test_manage_child.h"
 
