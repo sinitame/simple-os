@@ -16,9 +16,8 @@
     #else
     #include <stdio.h>
     #include "processus.h"
-    #include "hash.h"
     #include "stddef.h"
-    #include "mem.h"
+    #include "sh_mem.h"
 
     void* shm_acquire(const char *key);
     extern void test_it();
@@ -65,29 +64,6 @@
                     printf(" %d", i);
             }
             return 0;
-    }
-
-    hash_t *map;
-
-    void *shm_create(const char *key) {
-        map = mem_alloc(sizeof(hash_t));
-        hash_init_string(map);
-        void* page=mem_alloc(4*1024);
-        if (!hash_set(map, (void*)key, page)) {
-            return page;
-        }
-        mem_free(page, 4*1024);
-        return NULL;
-    }
-
-    void *shm_acquire(const char *key) {
-        return hash_get(map, (void*)key, NULL);
-    }
-
-    void shm_release(const char *key) {
-            // TODO faux car la page peut encore etre pointee par des processus
-            // mais ok pour l'instant
-            hash_del(map, (void*)key);
     }
 
     int test7(void *arg)

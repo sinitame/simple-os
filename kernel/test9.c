@@ -3,10 +3,15 @@
  *
  * Test de la sauvegarde des registres dans les appels systeme et interruptions
  ******************************************************************************/
-#ifdef _TEST9_H_
 
     #include <stdio.h>
-    #include "test9.h"
+    #include "processus.h"
+    #include "stddef.h"
+    #include "sh_mem.h"
+    #include "test_eax.h"
+    #include "test_regs2.h"
+    #include "rand.h"
+
 
     static unsigned int ebp_before = 0x12345678u;
     static unsigned int esp_before = 0x87654321u;
@@ -17,9 +22,14 @@
     static unsigned int edi        = 0x0F0F0F0Fu;
     static unsigned int esi        = 0xABCDEFABu;
 
+    int nothing(void *arg) {
+        (void)arg;
+        return 0;
+    }
+
     __asm__(
     "       .data                   \n"
-    "nothing:                       \n"
+    "anything:                      \n"
     "       .string \"nothing\"     \n"
     "       .previous               \n"
     );
@@ -36,11 +46,12 @@
 
             /* Démarrer le processus "nothing" */
             "pushl  $0                      \n"
+            "pushl  $anything                \n"
             "pushl  $192                    \n"
             "pushl  $4000                   \n"
             "pushl  $nothing                \n"
             "call   start                   \n"
-            "addl   $16,    %%esp           \n"
+            "addl   $20,    %%esp           \n"
             "movl   %%eax,  %2              \n"
 
             /* Sauver les registres */
@@ -80,6 +91,8 @@
             int pid;
             volatile unsigned *it_ok = NULL;
 
+            // necessaire car sinon test9.c:112 while(*it_ok != 0) cree une famine
+            sti();
             (void)arg;
             it_ok = (unsigned*) shm_create("test9_shm");
             assert(it_ok != NULL);
@@ -94,7 +107,7 @@
             /* Test de la cohérence de tous les registres */
             for (i = 0; i < 100; i++) {
                     *it_ok = 1;
-                    pid = start("test_regs2", 4000, 128, 0);
+                    pid = start(test_regs2, 4000, 128, "test_regs2", 0);
                     assert(pid > 0);
                     while (*it_ok != 0);
                     *it_ok = 1;
@@ -105,7 +118,7 @@
             /* Test de la cohérence de %eax */
             for (i = 0; i < 100; i++) {
                     *it_ok = 1;
-                    pid = start("test_eax", 4000, 128, 0);
+                    pid = start(test_eax, 4000, 128, "test_eax", 0);
                     assert(pid > 0);
                     while (*it_ok != 0);
                     *it_ok = 1;
@@ -116,5 +129,3 @@
             shm_release("test9_shm");
             return 0;
     }
-
-#endif
