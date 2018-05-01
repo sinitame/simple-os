@@ -5,8 +5,9 @@
 void test(void *arg)
 {
   (void)arg;
-  char string[5];
+  printf("Cons_read attends 4 caractères pour l'affichage.\nSi ENTER, l'affichage à lieu : on affiche les caractères deja recus. \n \n");
   while(1){
+    char string[5] = {0,0,0,0,0};
     switch(cons_read(string,4 )){
       case 1 :
         printf("1 : %s \n" , string);
