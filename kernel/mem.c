@@ -13,7 +13,7 @@ extern char mem_heap_end[];
 static char *curptr = mem_heap;
 
 void xfree(void *zone){
-	mem_free(zone,sizeof(zone));
+	mem_free_nolength(zone);
 };
 
 

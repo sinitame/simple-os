@@ -12,13 +12,11 @@
 #include "listchainee.h"
 #include "processus.h"
 #include "mem.h"
+#include "shell.h"
 
 
 
 Liste jobs;
-
-
-
 
 void terminate(char *line) {
 
@@ -29,8 +27,8 @@ void terminate(char *line) {
 }
 
 
-int main() {
-
+int shell(void *arg) {
+	(void)arg;
 	jobs = NULL;
 
 	while (1) {

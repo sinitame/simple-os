@@ -117,18 +117,10 @@ void cons_echo(int on){
 }
 
 void keyboard_data(char *str){
-
-
-  printf("Codes ASCII de la touche : ");
     for (int i = 0; str[i] != '\0'; i++) {
-        printf("%d ", str[i]);
+        printf("%c", str[i]);
         add_buff(&stdin, str[i]);
     }
-
-    printf("\n");
-
-
-
 }
 
 void tic_CLAVIER(void){

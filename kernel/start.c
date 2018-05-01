@@ -11,7 +11,7 @@
 #include "../user/lib/interruptions.h"
 #include "processus.h"
 
-#include "tests.h"
+#include "shell.h"
 
 void kernel_start(void)
 {
@@ -35,7 +35,7 @@ void kernel_start(void)
 	// start(test4, 4000, 128, "test4", (void *) 77);
 	// start(test5, 4000, 128, "test5", (void *) 77);
 	//start(test6, 4000, 128, "test6", (void *) 77);
-	start(test, 4000, 128, "test_cons_read", (void *) 77);
+	start(shell, 4000, 128, "shell", (void *) 77);
 
 	// start(killer, 4000, 128, "killer", (void *) 0);
 
