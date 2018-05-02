@@ -7,7 +7,7 @@
 #include "../shared/queue.h"
 #include "../user/lib/clock.h"
 
-#define NBPROC 10
+#define NBPROC 100
 #define MAXPRIO 256
 
 #define STACK_KERNEL 1024	// taille mini de 1ko

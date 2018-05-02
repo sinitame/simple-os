@@ -31,7 +31,7 @@ int pcount(int fid, int *count) {
 
 int pcreate(int count) {
   //s'il reste plus de files de messages ou le nombre count est négative ou égale à zéro
-  if (nb_queues>=NBQUEUE || count<=0 || count>50) {
+  if (nb_queues>=NBQUEUE || count<=0 || count>1000) {
     return -1;
   }
 
@@ -152,12 +152,16 @@ int preceive(int fid,int *message) {
   queue_del(msg, chaine);
   if (message!=NULL) {
     *message=msg->val;
+    printf("message recu : %d\n", msg->val);
   }
   mem_free(msg, sizeof(File_priorite));
   //On décrément le nombre de messages dans la file
   tab_message_queues[fid]->nb_msg--;
   //s'il existe des processus producteurs bloqués
   if (!queue_empty(&tab_message_queues[fid]->blocked_producers)) {
+    update_list(&tab_message_queues[fid]->blocked_producers);
+    printf("liste des producteus blockés\n");
+    print_list(&tab_message_queues[fid]->blocked_producers);
     //On récupére le processus bloqué le plus prioritaire
     File_priorite *proc;
     proc=queue_out(&tab_message_queues[fid]->blocked_producers, File_priorite, chaine);
@@ -257,6 +261,7 @@ int psend(int fid, int message){
   File_priorite *nv_msg;
   nv_msg=mem_alloc(sizeof(File_priorite));
   nv_msg->val=message;
+  printf("message ecrit : %d \n", nv_msg->val);
   if (queue_empty(&tab_message_queues[fid]->messages)!=0) {
     nv_msg->prio=0;
   }
@@ -270,6 +275,9 @@ int psend(int fid, int message){
   tab_message_queues[fid]->nb_msg++;
   //s'il existe des processus consomatteurs bloqués
   if (tab_message_queues[fid]->nb_b_c!=0) {
+    update_list(&tab_message_queues[fid]->blocked_consumers);
+    printf("liste des consomatteurs blockés\n");
+    print_list(&tab_message_queues[fid]->blocked_consumers);
     //On récupére le processus bloqué le plus prioritaire
     File_priorite *proc;
     proc=queue_out(&tab_message_queues[fid]->blocked_consumers, File_priorite, chaine);
@@ -285,6 +293,22 @@ int psend(int fid, int message){
       table_processus[proc->val]->etat=activable;
     }
     ordonnancement();
+  }
+  return 0;
+}
+int update_list(link *head) {
+  File_priorite *proc_courant = mem_alloc(sizeof(File_priorite));
+  queue_for_each(proc_courant, head, File_priorite, chaine) {
+    queue_del(proc_courant, chaine);
+    proc_courant->prio = table_processus[proc_courant->val]->prio;
+    queue_add(proc_courant, head, File_priorite, chaine, prio);
+  }
+  return 0;
+}
+int print_list(link *head) {
+  File_priorite *proc_courant = mem_alloc(sizeof(File_priorite));
+  queue_for_each(proc_courant, head, File_priorite, chaine) {
+    printf("%d %d \n", proc_courant->val, proc_courant->prio);
   }
   return 0;
 }
