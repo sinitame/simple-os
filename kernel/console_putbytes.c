@@ -74,7 +74,7 @@
  	if (c<32) {
  		switch(c){
  			case 8:
- 				if (curseur_lig>0) { place_curseur(curseur_lig, curseur_col-1); }
+ 				if (curseur_col>0) { place_curseur(curseur_lig, curseur_col-1); }
  			break;
 
  			case 9:

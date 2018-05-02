@@ -31,6 +31,8 @@ typedef struct Buffer {
 } buffer_clavier;
 
 extern buffer_clavier stdin;
+extern void console_putbytes(const char *chaine, int taille );
+extern void traite_car(char c);
 int init_buff(buffer_clavier * buf, int taille);
 int empty_buff(buffer_clavier * buf);
 int full_buff(buffer_clavier *buf);

@@ -76,19 +76,27 @@ unsigned long cons_read(char *string, unsigned long length)
 	do {
     if (!empty_buff(&stdin)){
       get_buffer(&stdin,&ascii_car);
-  		if (ascii_car != 13) {
-  			string[indice] = ascii_car;
-        indice ++;
-      }
-    }
 
+      switch(ascii_car){
+        case 13 :
+          break;
+        case 127 :
+          if (indice>0) {
+            string[--indice] = 0;
+          }
+          break;
+        default :
+          string[indice++] = ascii_car;
+          break;
+        }
+    }
 	} while (ascii_car !=13 && indice < length);
   return indice;
 
 }
 
 int cons_write(const char *str, long size){
-  int i;
+  /*int i;
 
   if ((int)strlen(str) >= size){
     for ( i=0; i<size;i++){
@@ -98,6 +106,9 @@ int cons_write(const char *str, long size){
   } else{
     return -1;
   }
+  */
+  console_putbytes(str,size);
+  return size;
 }
 
 void cons_echo(int on){
@@ -107,13 +118,18 @@ void cons_echo(int on){
 void keyboard_data(char *str){
 
 
-  printf("Codes ASCII de la touche : ");
     for (int i = 0; str[i] != '\0'; i++) {
-        printf("%d ", str[i]);
+      if ((0<=str[i])&&(str[i]<127)){
+        traite_car(str[i]);
+      } else if (str[i] == 127){
+        printf("\b");
+        printf(" ");
+        printf("\b");
+      }
         add_buff(&stdin, str[i]);
     }
 
-    printf("\n");
+
 
 
 
