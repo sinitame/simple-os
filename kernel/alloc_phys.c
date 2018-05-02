@@ -6,6 +6,12 @@
 // a free list that links all unallocated regions of memory
 
 
+free_list* create_list(){
+  free_list* new = NULL;
+  return free_list;
+}
+
+
 
 // free a region of memory
 free_list* add(free_list* list, int* address){
