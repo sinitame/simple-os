@@ -9,6 +9,7 @@
 
 // free a region of memory
 free_list* add(free_list* list, int* address){
+  assert(adress % 4096 ==0); // Assuring that page adress is a multiple of 4096
   free_list* new = (free_list*) mem_alloc(sizeof(free_list));
   assert(new != NULL);
   new->address = address;
