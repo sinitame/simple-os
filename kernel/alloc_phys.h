@@ -2,11 +2,14 @@
 #define ALLOC_H
 
 
-
+free_list* create_list();
+free_list* add(free_list* list, unsigned* address);
+unsigned* delete(free_list* list);
+unsigned is_in_list(free_list* list, unsigned* address);
 
 
 typedef struct free_list{
-  int* address;
+  unsigned* address;
   struct free_list *suiv;
 } free_list;
 

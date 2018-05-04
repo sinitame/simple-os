@@ -5,6 +5,7 @@
 #include <string.h>
 #include "../shared/malloc.c"
 #include "boot/early_mm.h"
+#include "alloc_phys.h"
 
 extern void ctx_sw(int*,int*);
 extern int read_eax();
@@ -14,7 +15,7 @@ extern unsigned pgdir[];
 #define PAGE_TABLE_RO      0x000000001u
 #define PAGE_TABLE_RW      0x000000003u
 
-
+free_list* ListePagesLibres = create_list();
 
 void init_idle(void){
 
@@ -62,7 +63,7 @@ void init(int pid, const char* nom, unsigned long ssize,int prio, int (*processu
 	P->registres[esp] = (uint32_t)((P->pile) +ssize-3);
 
 	P->reveil = 0;
-  P->pgdir =  mem_alloc(1024*4);
+  	P->pgdir =  mem_alloc(1024*4);
 	P->pgtab =  mem_alloc(1024*4);
 
 
@@ -348,16 +349,42 @@ void wait_clock(uint32_t nbr_secs){
 }
 
 hash_t* create_hash() {
-  hash_t *map=mem_alloc(sizeof(hash_t));
-  hash_init_string(map);
-  int i=0;
-  const char* key=mem_alloc(sizeof(key));
-  void* value;
-  while ((symbols_table + i)->name!=NULL) {
-    key = (symbols_table + i)->name;
-    value = (symbols_table + i)->start;
-    hash_set(map, (char*) key, value);
-    i++;
-  }
-  return map;
+  	hash_t *map=mem_alloc(sizeof(hash_t));
+  	hash_init_string(map);
+  	int i=0;
+  	const char* key=mem_alloc(sizeof(key));
+  	void* value;
+  	while ((symbols_table + i)->name!=NULL) {
+    	key = (symbols_table + i)->name;
+    	value = (symbols_table + i)->start;
+    	hash_set(map, (char*) key, value);
+    	i++;
+  	}
+  	return map;
+}
+
+void proc_mapping(unsigned *pagedir, unsigned virtual_adress, unsigned physical_adress, unsigned permission){
+	//commence par copier les adresses du kernel au début du nouveau page directory
+	for(int i=0; i<64;i++){
+		pagedir[i] = pgdir[i];
+	}
+
+	/* code du processus à partir de 1Go(a partir de l'adresse virtuelle passee en parametre ici), on mappe 256Mo*/
+	unsigned pgdir_index = virtual_adress>>22;
+	unsigned pgtab_index = (virtual_adress>>12) & 0x3FFu; //utile ?
+	//creation des page table dans le page dir
+	/*!\ Juste une entree pour le code et une entree pour la pile A FAIRE*/
+	int i=pgdir_index
+	unsigned *pagetab=mem_alloc(1024*4);
+	pagedir[i]=pagetab;
+	for (int j=0;j<1024;j++){
+		unsigned *page = mem_alloc(4*4*1024);
+		pagetab[j]=page;
+		ListePagesLibres=add(ListePagesLibres,page);
+		for (int k=0; k<4*1024; k++){
+			page[k]=physical_adress;
+			physical_adress+=1;
+		}
+	}
+
 }

@@ -14,7 +14,7 @@ free_list* create_list(){
 
 
 // free a region of memory
-free_list* add(free_list* list, int* address){
+free_list* add(free_list* list, unsigned* address){
   assert(adress % 4096 ==0); // Assuring that page adress is a multiple of 4096
   free_list* new = (free_list*) mem_alloc(sizeof(free_list));
   assert(new != NULL);
@@ -25,7 +25,7 @@ free_list* add(free_list* list, int* address){
 }
 
 // allocate a region of memory, thus deleting region from list, returning the address of the free page
-int* delete(free_list* list){
+unsigned* delete(free_list* list){
   free_list* first = list;
   list = list->suiv;
   return first->address;
@@ -33,7 +33,7 @@ int* delete(free_list* list){
 
 
 // check if a region in unallocated
-int is_in_list(free_list* list, int* address){
+unsigned is_in_list(free_list* list, unsigned* address){
   free_list* iterator = list;
   if(iterator->address == address){
     return 1;

@@ -62,5 +62,6 @@ int chprio(int pid, int newprio);
 int getpid(void);
 void wait_clock(uint32_t nbr_secs);
 hash_t* create_hash();
+void proc_mapping(unsigned *pgdir, unsigned virtual_adress, unsigned physical_adress, unsigned permission);
 
 #endif
