@@ -92,7 +92,7 @@ int test17(void *arg)
         assert(prio == 128);
         n = 0;
         while (1) {
-	  int pid = start(no_run, 2000, 127, "no_run", 0);
+                int pid = start(no_run, 2000, 127, "no_run", 0);
                 if (pid < 0) break;
                 ids[n++] = pid;
                 if (n == l) {
@@ -120,4 +120,3 @@ int test17(void *arg)
         printf(", %d.\n", n);
 	return 0;
 }
-

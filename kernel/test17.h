@@ -1,6 +1,6 @@
-#ifndef TEST_17
-#define TEST_17
+#ifndef TEST_17_H
+#define TEST_17_H
 
-extern int test17(void* args);
+extern int test17(void* arg);
 
-#endif
+#endif 
