@@ -24,6 +24,7 @@ Les tests 10 et 11 utilisent les semaphores
 #include "test14.h"
 #include "test15.h"
 #include "test16.h"
+#include "test17.h"
 
 #include "test_manage_child.h"
 

@@ -157,9 +157,9 @@ int preceive(int fid,int *message) {
   mem_free(msg, sizeof(File_priorite));
   //On décrément le nombre de messages dans la file
   tab_message_queues[fid]->nb_msg--;
+  update_list(fid, &tab_message_queues[fid]->blocked_producers, 1);
   //s'il existe des processus producteurs bloqués
   if (!queue_empty(&tab_message_queues[fid]->blocked_producers)) {
-    update_list(&tab_message_queues[fid]->blocked_producers);
     printf("liste des producteus blockés\n");
     print_list(&tab_message_queues[fid]->blocked_producers);
     //On récupére le processus bloqué le plus prioritaire
@@ -167,12 +167,6 @@ int preceive(int fid,int *message) {
     proc=queue_out(&tab_message_queues[fid]->blocked_producers, File_priorite, chaine);
     //On décrément le nombre de processus producteurs bloqués
     tab_message_queues[fid]->nb_b_p--;
-    //On vérifie si le processus est tué
-    while (table_processus[proc->val]==NULL && tab_message_queues[fid]->nb_b_p!=0) {
-      proc=queue_out(&tab_message_queues[fid]->blocked_producers, File_priorite, chaine);
-      //On décrément le nombre de processus producteurs bloqués
-      tab_message_queues[fid]->nb_b_p--;
-    }
     if (table_processus[proc->val]!=NULL) {
       table_processus[proc->val]->etat=activable;
     }
@@ -273,9 +267,11 @@ int psend(int fid, int message){
   queue_add(nv_msg, &(tab_message_queues[fid]->messages), File_priorite, chaine, prio);
   //incrément du nombre de messages dans la file
   tab_message_queues[fid]->nb_msg++;
+  printf("liste des consomatteurs blockés\n");
+  print_list(&tab_message_queues[fid]->blocked_consumers);
+  update_list(fid, &tab_message_queues[fid]->blocked_consumers, 0);
   //s'il existe des processus consomatteurs bloqués
   if (tab_message_queues[fid]->nb_b_c!=0) {
-    update_list(&tab_message_queues[fid]->blocked_consumers);
     printf("liste des consomatteurs blockés\n");
     print_list(&tab_message_queues[fid]->blocked_consumers);
     //On récupére le processus bloqué le plus prioritaire
@@ -283,12 +279,6 @@ int psend(int fid, int message){
     proc=queue_out(&tab_message_queues[fid]->blocked_consumers, File_priorite, chaine);
     //On décrément le nombre de processus producteurs bloqués
     tab_message_queues[fid]->nb_b_c--;
-    //On vérifie si le processus est tué
-    while (table_processus[proc->val]==NULL && tab_message_queues[fid]->nb_b_c!=0) {
-      proc=queue_out(&tab_message_queues[fid]->blocked_consumers, File_priorite, chaine);
-      //On décrément le nombre de processus producteurs bloqués
-      tab_message_queues[fid]->nb_b_c--;
-    }
     if (table_processus[proc->val]!=NULL) {
       table_processus[proc->val]->etat=activable;
     }
@@ -296,12 +286,36 @@ int psend(int fid, int message){
   }
   return 0;
 }
-int update_list(link *head) {
+int update_list(int fid, link *head, int p) {
   File_priorite *proc_courant = mem_alloc(sizeof(File_priorite));
-  queue_for_each(proc_courant, head, File_priorite, chaine) {
-    queue_del(proc_courant, chaine);
-    proc_courant->prio = table_processus[proc_courant->val]->prio;
-    queue_add(proc_courant, head, File_priorite, chaine, prio);
+  int nb;
+  if (p==1) { 
+    nb = tab_message_queues[fid]->nb_b_p;
+  }
+  else {
+    nb = tab_message_queues[fid]->nb_b_c;
+  }
+  File_priorite *tab_tmp[nb];
+  int i_tmp=0;
+  while (nb>0) {
+    proc_courant=queue_out(head, File_priorite, chaine);
+    if (table_processus[proc_courant->val]!=NULL) {
+      proc_courant->prio = table_processus[proc_courant->val]->prio;
+      tab_tmp[i_tmp] = proc_courant;
+      i_tmp++;
+    }
+    else {
+      if (p == 1) {
+	tab_message_queues[fid]->nb_b_p--;
+      }
+      else {
+	tab_message_queues[fid]->nb_b_c--;
+      }
+    }
+    nb--;
+  }
+  for (int j=0; j<i_tmp; j++) {
+    queue_add(tab_tmp[j], head, File_priorite, chaine, prio);
   }
   return 0;
 }
