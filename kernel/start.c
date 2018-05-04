@@ -27,6 +27,8 @@ void kernel_start(void)
 
 	efface_ecran();
 
+    free_list* ListePagesLibres= create_list();
+
 	init_idle();
 
 

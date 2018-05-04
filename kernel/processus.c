@@ -5,17 +5,16 @@
 #include <string.h>
 #include "../shared/malloc.c"
 #include "boot/early_mm.h"
-#include "alloc_phys.h"
 
 extern void ctx_sw(int*,int*);
 extern int read_eax();
 extern unsigned pgdir[];
-
+free_list* ListePagesLibres;
 
 #define PAGE_TABLE_RO      0x000000001u
 #define PAGE_TABLE_RW      0x000000003u
 
-free_list* ListePagesLibres = create_list();
+
 
 void init_idle(void){
 
@@ -64,13 +63,15 @@ void init(int pid, const char* nom, unsigned long ssize,int prio, int (*processu
 
 	P->reveil = 0;
   	P->pgdir =  mem_alloc(1024*4);
+	/*a completer */
+	proc_mapping(P->pgdir, virtual_adress, physical_adress, permission);
 	P->pgtab =  mem_alloc(1024*4);
 
 
 	P->pgtab[0] = 0;
-	for(int i=0; i<64;i++){
+	/*for(int i=0; i<64;i++){
 		P->pgdir[i] = pgdir[i];
-	}
+	}*/
 
 
 
@@ -371,20 +372,33 @@ void proc_mapping(unsigned *pagedir, unsigned virtual_adress, unsigned physical_
 
 	/* code du processus à partir de 1Go(a partir de l'adresse virtuelle passee en parametre ici), on mappe 256Mo*/
 	unsigned pgdir_index = virtual_adress>>22;
-	unsigned pgtab_index = (virtual_adress>>12) & 0x3FFu; //utile ?
+	//unsigned pgtab_index = (virtual_adress>>12) & 0x3FFu; //utile ?
 	//creation des page table dans le page dir
-	/*!\ Juste une entree pour le code et une entree pour la pile A FAIRE*/
-	int i=pgdir_index
+
+	int i=pgdir_index;
 	unsigned *pagetab=mem_alloc(1024*4);
-	pagedir[i]=pagetab;
-	for (int j=0;j<1024;j++){
+	pagedir[i]=(unsigned)pagetab;
+	pagetab[0]=0;
+	for (int j=1;j<1024;j++){
 		unsigned *page = mem_alloc(4*4*1024);
-		pagetab[j]=page;
+		pagetab[j]=((unsigned)page & 0xFFFFF000) | permission;
 		ListePagesLibres=add(ListePagesLibres,page);
 		for (int k=0; k<4*1024; k++){
-			page[k]=physical_adress;
+			page[k]=(unsigned)physical_adress;
 			physical_adress+=1;
 		}
+	}
+
+	/*gestion de la pile */
+	i+=1;
+	unsigned *pilePageTab=mem_alloc(1024*4);
+	unsigned *pilePage=mem_alloc(4*4*1024);
+	pilePageTab[0]=0;
+	pilePageTab[1]=(unsigned)pilePageTab;
+	ListePagesLibres=add(ListePagesLibres,pilePage);
+	for (int k=0; k<4*1024; k++){
+		pilePage[k]=(unsigned)physical_adress;
+		physical_adress+=1;
 	}
 
 }

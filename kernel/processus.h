@@ -8,6 +8,8 @@
 #include "../user/lib/clock.h"
 #include "hash.h"
 #include "userspace_apps.h"
+#include "alloc_phys.h"
+
 
 #define NBPROC 10
 #define MAXPRIO 256
@@ -46,6 +48,7 @@ struct Processus {
 Processus *table_processus[NBPROC+1];
 link file_processus;
 Processus *processus_actif;
+extern free_list* ListePagesLibres;
 
 // idle
 void init_idle(void);
@@ -62,6 +65,6 @@ int chprio(int pid, int newprio);
 int getpid(void);
 void wait_clock(uint32_t nbr_secs);
 hash_t* create_hash();
-void proc_mapping(unsigned *pgdir, unsigned virtual_adress, unsigned physical_adress, unsigned permission);
+void proc_mapping(unsigned *pagedir, unsigned virtual_adress, unsigned physical_adress, unsigned permission);
 
 #endif
