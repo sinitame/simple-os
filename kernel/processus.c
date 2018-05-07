@@ -60,12 +60,28 @@ void init(int pid, const char* nom, unsigned long ssize,int prio, int (*processu
 
 	//Ajout du processus crée à la liste des fils du process actif
 	//la tete de liste est toujours le fils le plus recemment cree
-	P->suiv=processus_actif->child;
+	/*P->suiv=processus_actif->child;
 	if (processus_actif->child != NULL) {
 		processus_actif->child->prec=P;
+	}*/
+
+	//Ajout du processus crée à la liste des fils du process actif
+	//la tete de liste est le fils le plus ancien
+	P->suiv = NULL;
+	if (processus_actif->child == NULL) {
+		P->prec = NULL;
+		processus_actif->child = P;
 	}
-	processus_actif->child=P;
-	P->prec=NULL;
+	else {
+		Processus *tmp = processus_actif->child;
+		while (tmp->suiv!=NULL) {
+			tmp = tmp->suiv;
+		}
+		tmp->suiv = P;
+		P->prec = tmp;
+	}
+	//processus_actif->child=P;
+	//P->prec=NULL;
 	// si la prio du processus cree est superieure a celle du processus actif
 	if (prio > processus_actif->prio) {
 		ordonnancement();
