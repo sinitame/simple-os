@@ -1,7 +1,8 @@
 .text
 .globl cr3_sw
 # l'adresse du nouveau pagedir est a esp+4
-# prototype void cr3_sw(void * new_pagedir)
+# prototype void* cr3_sw(void * new_pagedir)
 cr3_sw:
-movl 4(%esp), %cr3
+movl 4(%esp), %eax
+movl %eax, %cr3
 ret
