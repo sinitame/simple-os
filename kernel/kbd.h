@@ -22,6 +22,7 @@
 #ifndef __KBD_H__
 #define __KBD_H__
 #include "processus.h"
+#include <stdbool.h>
 
 typedef struct Buffer {
     volatile int r;
@@ -30,6 +31,7 @@ typedef struct Buffer {
     char *buffer;
 } buffer_clavier;
 
+extern bool b_echo;
 extern buffer_clavier stdin;
 extern void console_putbytes(const char *chaine, int taille );
 extern void traite_car(char c);

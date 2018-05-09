@@ -1,5 +1,6 @@
 #include "kbd.h"
 #include "stdio.h"
+#include <stdbool.h>
 #include <string.h>
 #include "mem.h"
 #include "../shared/errno.h"
@@ -8,7 +9,7 @@
 #include <inttypes.h>
 
 
-
+bool b_echo=true;
 
 char *strdup(const char *src)
 {
@@ -128,18 +129,28 @@ int cons_write(const char *str, long size){
 }
 
 void cons_echo(int on){
-  on = !on;
+  //on = !on;
+  if (on == 0) {
+    b_echo = false;
+  }
+  else {
+    b_echo = true;
+  }
 }
 
 void keyboard_data(char *str){
 
-
     for (int i = 0; str[i] != '\0'; i++) {
       if ((0<=str[i])&&(str[i]<127)){
-        traite_car(str[i]);
+        if (b_echo) {
+          traite_car(str[i]);
+        }
+        else {
+
+        }
       }
-        add_buff(&stdin, str[i]);
-      }
+      add_buff(&stdin, str[i]);
+    }
 }
 
 void tic_CLAVIER(void){

@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include "commandes_shell.h"
 #include "processus.h"
 #include "string.h"
@@ -5,6 +6,7 @@
 #include "listchainee.h"
 #include "../shared/console.h"
 #include "kbd.h"
+
 
 extern Liste jobs;
 
@@ -40,7 +42,6 @@ int create_process(char ** l){
       } else {
         return -1;
       }
-
     } else if (!strcmp(l[0],"echo")){
       pid = start(echo,4000, 130, "echo",l[1]);
 
@@ -87,7 +88,7 @@ int help(void *arg) {
   printf(" * ps - affichage des processus\n");
   printf(" * sleep t - mise en pause du processus pendant t secondes\n");
   printf(" * clear - nettoyer le shell\n");
-  printf(" * print - affichage d'un message à l'écran\n");
+  printf(" * print - affichage d'un message a l'ecran\n");
   printf(" * header - re-affichage de l'entete du shell\n");
   printf(" * help - affichage des commandes disponibles\n");
   printf(" * echo - fait passer l'affichage en mode echo on ou echo off \n");
@@ -110,6 +111,6 @@ int print(void *arg) {
 
 int echo(void *arg) {
   (void)arg;
-  cons_echo(1);
+  cons_echo(!b_echo);
   return 1;
 }
