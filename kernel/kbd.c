@@ -95,6 +95,10 @@ unsigned long cons_read(char *string, unsigned long length)
         case 127 :
           if (indice>0) {
             string[--indice] = 0;
+              printf("\b");
+              printf(" ");
+              printf("\b");
+          
           }
           break;
         default :
@@ -133,10 +137,6 @@ void keyboard_data(char *str){
     for (int i = 0; str[i] != '\0'; i++) {
       if ((0<=str[i])&&(str[i]<127)){
         traite_car(str[i]);
-      } else if (str[i] == 127){
-        printf("\b");
-        printf(" ");
-        printf("\b");
       }
         add_buff(&stdin, str[i]);
     }
