@@ -3,7 +3,7 @@
 
 #include "queue.h"
 
-#define NBQUEUE 10
+#define NBQUEUE 1000
 
 struct file_priorite {
   int val;
@@ -38,4 +38,6 @@ int pdelete(int fid);
 int preceive(int fid,int *message);
 int preset(int fid);
 int psend(int fid, int message);
+int update_list(int fid, link *head, int p);
+int print_list(link *head);
 #endif
