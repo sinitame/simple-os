@@ -13,6 +13,8 @@
 #include "processus.h"
 #include "mem.h"
 #include "shell.h"
+#include "commandes_shell.h"
+#include "errno.h"
 
 
 
@@ -67,11 +69,12 @@ int shell(void *arg) {
 				// Syntax error, read another command
 				printf("error: %s\n", l->err);
 				continue;
-			}
+			}*/
 
 
-	int pid = create_process();
-	int statut;
+ 		int pid = create_process(l->seq[0]);
+
+	/*int statut;
 
 	void fin_process(int signum){
 		int status,pid;
@@ -93,25 +96,15 @@ int shell(void *arg) {
     	sigaction(SIGCHLD, &p, NULL);
 
 
+*/
 
 	switch(pid){
 		case -1:
-			return EXIT_FAILURE;
+			return -1;
 			break;
-		case 0:
-			switch(sizecmd(l)){
-				case 1:
-
-					execute(l->seq[0],l->in,l->out);
-					break;
-
-				case 2:
-					pipe_cmd(l);
-					break;
-			}
 
 		default:
-
+/*
 			jobs = ajoutQueue(jobs,pid,l->seq[0][0],0);
 			if (!strcmp(l->seq[0][0],"jobs")){
 				jobs = changeStatus(jobs);
@@ -124,9 +117,8 @@ int shell(void *arg) {
 			if(!strcmp(l->seq[0][0] , "ulimit")){
 				change_tmp_execute(l);
 			}
-
+*/
 			break;
 		}
-*/
 	}
 }
