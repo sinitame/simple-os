@@ -30,12 +30,13 @@ void terminate(char *line) {
 
 void entete(void) {
 	int i;
-	printf("\n\n");
+	printf("\n\n\n");
 	printf("     ");
 	for (i=0; i<=69; i++) {
 		printf("*");
 	}
 	printf("\n");
+	/*
 	printf("     *            |||||||   |||||||  ||||||| ||||||||  ||||||             *\n");
 	printf("     *            ||    || ||       ||       ||       ||    ||            *\n");
 	printf("     *            ||    || ||       ||       ||       ||    ||            *\n");
@@ -43,12 +44,21 @@ void entete(void) {
 	printf("     *            ||       ||             || ||       ||    ||            *\n");
 	printf("     *            ||       ||             || ||       ||    ||            *\n");
 	printf("     *            ||        |||||||  ||||||  |||||||| ||    ||            *\n");
+	*/
+  printf("     *                                                  ||||              *\n");
+	printf("     *                |||  ||||||   ||||||             ||  ||             *\n");
+	printf("     *                 || ||    || ||                 || || ||            *\n");
+	printf("     *        ||||||  ||  ||    || ||                ||  ||  ||           *\n");
+	printf("     *       ||           ||    ||  ||||||          ||   ||   ||          *\n");
+	printf("     *        ||||||      ||    ||       ||        ||          ||         *\n");
+	printf("     *             ||     ||    ||       ||       ||     ##     ||        *\n");
+	printf("     *        ||||||       ||||||   ||||||       ||||||||||||||||||       *\n");
 	printf("     ");
 	for (i=0; i<=69; i++) {
 		printf("*");
 	}
-	printf("\n");
-	printf("\nBienvenue dans notre Shell !\n\n");
+	printf("\n\n");
+	printf("Bienvenue dans notre Shell !\n\n");
 }
 
 int shell(void *arg) {
@@ -56,14 +66,14 @@ int shell(void *arg) {
 	jobs = NULL;
 
 	entete();
-	
+
 	while (1) {
 
 
 		struct cmdline *l;
 		char *line=0;
 		//int i, j;
-		char *prompt = "shell>";
+		char *prompt = "shell> ";
 		/* Readline use some internal memory structure that
 		   	can not be cleaned at the end of the program. Thus
 		   	one memory leak per command seems unavoidable yet */
@@ -78,7 +88,7 @@ int shell(void *arg) {
 			/* parsecmd xfree line and set it up to 0 */
 			l = parsecmd( & line);
 
-			//printf("Commade:'%s', args: '%s', rin: %s, rout: '%s' \n", l->seq[0][0],l->seq[0][1],l->in,l->out);
+			//printf("Commande:'%s', args: '%s', rin: %s, rout: '%s' \n", l->seq[0][0],l->seq[0][1],l->in,l->out);
 
 /*
 			// If input stream closed, normal termination
