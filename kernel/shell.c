@@ -17,7 +17,6 @@
 #include "errno.h"
 
 
-
 Liste jobs;
 
 void terminate(char *line) {
@@ -28,10 +27,45 @@ void terminate(char *line) {
 	exit(0);
 }
 
+void entete(void) {
+	int i;
+	printf("\n\n");
+	printf("     ");
+	for (i=0; i<=69; i++) {
+		printf("*");
+	}
+	printf("\n");
+	/*
+	printf("     *            |||||||   |||||||  ||||||| ||||||||  ||||||             *\n");
+	printf("     *            ||    || ||       ||       ||       ||    ||            *\n");
+	printf("     *            ||    || ||       ||       ||       ||    ||            *\n");
+	printf("     *            |||||||  ||        ||||||  |||||||| ||||||||            *\n");
+	printf("     *            ||       ||             || ||       ||    ||            *\n");
+	printf("     *            ||       ||             || ||       ||    ||            *\n");
+	printf("     *            ||        |||||||  ||||||  |||||||| ||    ||            *\n");
+	*/
+  printf("     *                                                  ||||              *\n");
+	printf("     *                |||  ||||||   ||||||             ||  ||             *\n");
+	printf("     *                 || ||    || ||                 || || ||            *\n");
+	printf("     *        ||||||  ||  ||    || ||                ||  ||  ||           *\n");
+	printf("     *       ||           ||    ||  ||||||          ||   ||   ||          *\n");
+	printf("     *        ||||||      ||    ||       ||        ||          ||         *\n");
+	printf("     *             ||     ||    ||       ||       ||     ##     ||        *\n");
+	printf("     *        ||||||       ||||||   ||||||       ||||||||||||||||||       *\n");
+	printf("     ");
+	for (i=0; i<=69; i++) {
+		printf("*");
+	}
+	printf("\n             A. BAUMANN - B. BOUILHAC - T. DAVID - B. EL MEJJATI -\n");
+	printf("                    M.H. OTHMAN - E. SINITAMBIRIVOUTIN\n\n");
+  printf("              Bienvenue dans notre systeme d'exploitation s'OS !\n\n");
+}
 
 int shell(void *arg) {
 	(void)arg;
 	jobs = NULL;
+
+	entete();
 
 	while (1) {
 
@@ -39,7 +73,7 @@ int shell(void *arg) {
 		struct cmdline *l;
 		char *line=0;
 		//int i, j;
-		char *prompt = "shell>";
+		char *prompt = "shell> ";
 		/* Readline use some internal memory structure that
 		   	can not be cleaned at the end of the program. Thus
 		   	one memory leak per command seems unavoidable yet */
@@ -54,7 +88,7 @@ int shell(void *arg) {
 			/* parsecmd xfree line and set it up to 0 */
 			l = parsecmd( & line);
 
-			//printf("Commade:'%s', args: '%s', rin: %s, rout: '%s' \n", l->seq[0][0],l->seq[0][1],l->in,l->out);
+			//printf("Commande:'%s', args: '%s', rin: %s, rout: '%s' \n", l->seq[0][0],l->seq[0][1],l->in,l->out);
 
 /*
 			// If input stream closed, normal termination
