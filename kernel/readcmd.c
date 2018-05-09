@@ -35,6 +35,7 @@ char *readline(char *prompt)
 
 	printf("%s", prompt);
 	int n = cons_read(buf,16);
+	printf("\n");
 	if (n>0){
 		return(buf);
 	}
@@ -42,7 +43,6 @@ char *readline(char *prompt)
 		xfree(buf);
 		return NULL;
 	}
-	printf("\n");
 
 }
 
