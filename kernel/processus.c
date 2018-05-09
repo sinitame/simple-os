@@ -4,9 +4,13 @@
 #include <processus.h>
 #include <string.h>
 #include "../shared/malloc.c"
+#include "alloc_phys.h"
 
 
 extern void ctx_sw(int*,int*);
+extern int read_eax();
+extern unsigned pgdir[];
+free_list* ListePagesLibres= NULL;
 
 void init_idle(void){
 
@@ -351,4 +355,44 @@ void wait_clock(uint32_t nbr_secs){
 	processus_actif->reveil += nbr_secs;
 	processus_actif->etat = endormi;
 	ordonnancement();
+}
+
+unsigned *proc_mapping(unsigned *pagedir, unsigned virtual_adress, unsigned physical_adress, unsigned permission){
+	//commence par copier les adresses du kernel au début du nouveau page directoryœ
+	//Chaque page créée est ajoutée à la liste des pages libres
+	for(int i=0; i<64;i++){
+		pagedir[i] = pgdir[i];
+	}
+
+	/* code du processus à partir de 1Go(a partir de l'adresse virtuelle passee en parametre ici), on mappe 256Mo*/
+	unsigned pgdir_index = virtual_adress>>22;
+	//unsigned pgtab_index = (virtual_adress>>12) & 0x3FFu; //utile ?
+	//creation des page table dans le page dir
+
+	int i=pgdir_index;
+	unsigned *pagetab=mem_alloc(1024*4);
+	pagedir[i]=(unsigned)pagetab;
+	pagetab[0]=0;
+	unsigned *page = mem_alloc(4*4*1024);
+	pagetab[1]=((unsigned)page & 0xFFFFF000) | permission;
+	ListePagesLibres=add(ListePagesLibres,page);
+	for (int k=0; k<4*1024; k++){
+		page[k]=(unsigned)physical_adress;
+		physical_adress+=1;
+	}
+
+	/*gestion de la pile, une seule page table est allouée, cela represente 1000 pages de 4ko */
+	/*physical adress est ici le sommet de notre pile */
+	i+=1;
+	unsigned *pilePageTab=mem_alloc(1024*4);
+	unsigned *pilePage=mem_alloc(4*4*1024);
+	pilePageTab[0]=0;
+	pilePageTab[1]=(unsigned)pilePage;
+	ListePagesLibres=add(ListePagesLibres,pilePage);
+	for (int k=(4*1024)-1; k>=0; k--){
+		pilePage[k]=(unsigned)physical_adress;
+		physical_adress+=1;
+	}
+	return pilePage;
+
 }

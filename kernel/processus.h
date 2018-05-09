@@ -74,5 +74,6 @@ int getpid(void);
 char * mon_nom(void);
 void kill_childs(Processus *P);
 void wait_clock(uint32_t nbr_secs);
+unsigned* proc_mapping(unsigned *pagedir, unsigned virtual_adress, unsigned physical_adress, unsigned permission);
 
 #endif
