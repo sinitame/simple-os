@@ -28,11 +28,35 @@ void terminate(char *line) {
 	exit(0);
 }
 
+void entete(void) {
+	int i;
+	printf("\n\n");
+	printf("     ");
+	for (i=0; i<=69; i++) {
+		printf("*");
+	}
+	printf("\n");
+	printf("     *            |||||||   |||||||  ||||||| ||||||||  ||||||             *\n");
+	printf("     *            ||    || ||       ||       ||       ||    ||            *\n");
+	printf("     *            ||    || ||       ||       ||       ||    ||            *\n");
+	printf("     *            |||||||  ||        ||||||  |||||||| ||||||||            *\n");
+	printf("     *            ||       ||             || ||       ||    ||            *\n");
+	printf("     *            ||       ||             || ||       ||    ||            *\n");
+	printf("     *            ||        |||||||  ||||||  |||||||| ||    ||            *\n");
+	printf("     ");
+	for (i=0; i<=69; i++) {
+		printf("*");
+	}
+	printf("\n");
+	printf("\nBienvenue dans notre Shell !\n\n");
+}
 
 int shell(void *arg) {
 	(void)arg;
 	jobs = NULL;
 
+	entete();
+	
 	while (1) {
 
 
