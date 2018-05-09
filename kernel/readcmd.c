@@ -33,7 +33,7 @@ char *readline(char *prompt)
 	size_t buf_len = 16;
 	char *buf = mem_alloc(buf_len * sizeof(char));
 
-	printf(prompt);
+	printf("%s", prompt);
 	int n = cons_read(buf,16);
 	if (n>0){
 		return(buf);
@@ -42,6 +42,7 @@ char *readline(char *prompt)
 		xfree(buf);
 		return NULL;
 	}
+	printf("\n");
 
 }
 

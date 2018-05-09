@@ -70,9 +70,10 @@ int shell(void *arg) {
 				printf("error: %s\n", l->err);
 				continue;
 			}*/
-
-
- 		int pid = create_process(l->seq[0]);
+			int pid;
+			if (l!=NULL) {
+ 				pid = create_process(l->seq[0]);
+			}
 
 	/*int statut;
 
