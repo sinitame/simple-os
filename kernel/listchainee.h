@@ -9,8 +9,8 @@
 struct maillon{
 	int pid;
 	int indice;
-	//struct timeval time_start;
-	//struct timeval time_finish;
+	int time_start;
+	int time_finish;
 	int fini;
 	char *nom_process;
 	struct maillon *suiv;

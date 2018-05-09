@@ -71,55 +71,19 @@ int shell(void *arg) {
 				continue;
 			}*/
 			int pid;
+			int statut;
 			if (l!=NULL) {
  				pid = create_process(l->seq[0]);
-			}
+				jobs = supprimerElementsFinis(jobs);
 
-	/*int statut;
-
-	void fin_process(int signum){
-		int status,pid;
-		Liste tmp = jobs;
-		if ((pid=waitpid(-1,&status,WNOHANG))>0){
-			while (tmp != NULL){
-				if (tmp->pid == pid){
-					gettimeofday(&tmp->time_finish, NULL);
-					return;
+				if (!(l->bg)){
+					if (pid > -1){
+						while(waitpid(pid,&statut) != pid);
+						sti();
+					}
 				}
-				tmp = tmp->suiv;
 			}
-		}
-
-	}
-
-	struct sigaction p;
-    	p.sa_handler = fin_process;
-    	sigaction(SIGCHLD, &p, NULL);
 
 
-*/
-
-	switch(pid){
-		case -1:
-			return -1;
-			break;
-
-		default:
-/*
-			jobs = ajoutQueue(jobs,pid,l->seq[0][0],0);
-			if (!strcmp(l->seq[0][0],"jobs")){
-				jobs = changeStatus(jobs);
-				afficherListe(jobs);
-			}
-			jobs = supprimerElementsFinis(jobs);
-			if (!(l->bg)){
-				while(wait(&statut) != pid);
-			}
-			if(!strcmp(l->seq[0][0] , "ulimit")){
-				change_tmp_execute(l);
-			}
-*/
-			break;
-		}
 	}
 }

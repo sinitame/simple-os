@@ -2,19 +2,38 @@
 #include "processus.h"
 #include "string.h"
 #include "stdlib.h"
+#include "listchainee.h"
+
+
+extern Liste jobs;
 
 int create_process(char ** l){
   int pid;
-  if (!strcmp(l[0],"ps")){
-    pid = start(ps,4000, 130, "ps",l[1]);
-  } else if (!strcmp(l[0],"sleep")){
-    pid = start(sleep,4000, 130, "sleep",l[1]);
+  if (l[0]!=NULL ){
+    if (!strcmp(l[0],"ps")){
+      pid = start(ps,4000, 130, "ps",l[1]);
+    } else if (!strcmp(l[0],"sleep") ){
+      if (l[1]!=NULL){
+        pid = start(sleep,4000, 130, "sleep",l[1]);
+      } else {
+        return -1;
+      }
+
+    } else if (!strcmp(l[0],"jobs")){
+      jobs = changeStatus(jobs);
+      afficherListe(jobs);
+      return -1;
+    }
+    else {
+      printf("commande : '%s' non reconnue \n",l[0]);
+      return -1;
+    }
+
+    return pid;
+  } else {
+    return -1;
   }
-  else {
-    printf("commande : '%s' non reconnue",l[0]);
-  }
-  printf("\n");
-  return pid;
+
 }
 
 int ps(void *arg){

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "listchainee.h"
+#include "processus.h"
 #include "mem.h"
 
 
@@ -29,7 +30,7 @@ Liste ajoutQueue(Liste l, int pid, char* nom,int etat){
 
 	maillon->pid = pid;
 	maillon->fini = etat;
-	//gettimeofday(&maillon->time_start, NULL);
+	maillon->time_start = 0;
 	maillon->nom_process = mem_alloc(10*sizeof(char));
 	maillon->nom_process = strcpy(maillon->nom_process,nom);
 	maillon->suiv = NULL;
@@ -51,20 +52,19 @@ Liste ajoutQueue(Liste l, int pid, char* nom,int etat){
 
 void afficherListe(Liste l){
 	Liste tmp = l;
-	//long int temps = 0;
+	int duree = 0;
 	while (tmp != NULL){
 
 	if (tmp->fini == 0){
 		printf("[%d] en cours d'exécution %s (PID:%d) \n",tmp->indice,tmp->nom_process,tmp->pid);
 	}
-  /*else{
-		if ((tmp->time_finish.tv_usec != 0) && (tmp->time_start.tv_usec != 0)){
-			temps =((tmp->time_finish).tv_sec-(tmp->time_start).tv_sec)*1000.0 +
-				(((tmp->time_finish).tv_usec - (tmp->time_start).tv_usec)/1000.0);
+  else{
+		if ((tmp->time_finish != 0) && (tmp->time_start != 0)){
+			duree =((tmp->time_finish)-(tmp->time_start));
 		}
 
-		printf("[%d] Fini %s après %ld ms (PID:%d) \n", tmp->indice,tmp->nom_process,temps,tmp->pid);
-	}*/
+		printf("[%d] Fini %s après %d ms (PID:%d) \n", tmp->indice,tmp->nom_process,duree,tmp->pid);
+	}
 	tmp = tmp->suiv;
 
 	}
@@ -123,12 +123,12 @@ Liste supprimerElementsFinis(Liste l){
 		l->suiv = supprimerElementsFinis(l->suiv);
 }		return l;}
 
-/*
+
 Liste changeStatus(Liste l){
 	Liste tmp = l;
-	int status;
+	//int status;
 	while (tmp != NULL) {
-		if (waitpid(tmp->pid, &status, WNOHANG) == -1){
+		if (table_processus[tmp->pid] == NULL){
 			tmp->fini = 1;
 
 		}
@@ -138,4 +138,3 @@ Liste changeStatus(Liste l){
 	return l;
 
 }
-*/
