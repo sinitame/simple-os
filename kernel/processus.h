@@ -29,7 +29,7 @@ struct Processus {
 	uint32_t reveil;
 	char nom[15];
 	int registres[5];
-	int *pile;
+	unsigned *pile;
 	Processus *pere;
 	// pour la file de prio
 	link lien;
@@ -65,6 +65,6 @@ int chprio(int pid, int newprio);
 int getpid(void);
 void wait_clock(uint32_t nbr_secs);
 hash_t* create_hash();
-void proc_mapping(unsigned *pagedir, unsigned virtual_adress, unsigned physical_adress, unsigned permission);
+unsigned* proc_mapping(unsigned *pagedir, unsigned virtual_adress, unsigned physical_adress, unsigned permission);
 
 #endif

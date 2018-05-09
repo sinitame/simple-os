@@ -27,13 +27,12 @@ void kernel_start(void)
 
 	efface_ecran();
 
-    free_list* ListePagesLibres= create_list();
 
 	init_idle();
 
 
 	start(test4, 4000, 128, "test4", (void *) 77);
-	start(test5, 4000, 128, "test5", (void *) 77);
+	//start(test5, 4000, 128, "test5", (void *) 77);
 
 
 	idle();

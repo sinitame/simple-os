@@ -14,6 +14,8 @@ free_list* ListePagesLibres;
 
 #define PAGE_TABLE_RO      0x000000001u
 #define PAGE_TABLE_RW      0x000000003u
+unsigned shift=1;
+free_list* ListePagesLibres= NULL;
 
 
 
@@ -57,15 +59,23 @@ void init(int pid, const char* nom, unsigned long ssize,int prio, int (*processu
 	strcpy(P->nom,nom);
 	P->etat = activable;
 
-	P->pile[ssize-3] = (uint32_t)processus;
-	P->pile[ssize-2] = (uint32_t)exit;
-	P->pile[ssize-1] = (uint32_t)arg;
-	P->registres[esp] = (uint32_t)((P->pile) +ssize-3);
+
 
 	P->reveil = 0;
   	P->pgdir =  mem_alloc(1024*4);
 	/*a completer */
-	proc_mapping(P->pgdir, virtual_adress, physical_adress, PAGE_TABLE_RW);
+	hash_t *h = create_hash();
+	char *name = mem_alloc(sizeof(char));
+	strcpy(name, nom);
+	unsigned *p_physical_adress = hash_get(h, name, 0);
+	unsigned physical_adress = (unsigned) p_physical_adress;
+	unsigned virtual_adress = physical_adress << shift;
+	shift=shift+1;
+	P->pile=proc_mapping(P->pgdir, virtual_adress, physical_adress, PAGE_TABLE_RW);
+	P->pile[ssize-3] = (uint32_t)processus;
+	P->pile[ssize-2] = (uint32_t)exit;
+	P->pile[ssize-1] = (uint32_t)arg;
+	P->registres[esp] = (uint32_t)((P->pile) +ssize-3);
 	P->pgtab =  mem_alloc(1024*4);
 
 
@@ -365,7 +375,7 @@ hash_t* create_hash() {
   	return map;
 }
 
-void proc_mapping(unsigned *pagedir, unsigned virtual_adress, unsigned physical_adress, unsigned permission){
+unsigned *proc_mapping(unsigned *pagedir, unsigned virtual_adress, unsigned physical_adress, unsigned permission){
 	//commence par copier les adresses du kernel au début du nouveau page directoryœ
 	//Chaque page créée est ajoutée à la liste des pages libres
 	for(int i=0; i<64;i++){
@@ -381,27 +391,26 @@ void proc_mapping(unsigned *pagedir, unsigned virtual_adress, unsigned physical_
 	unsigned *pagetab=mem_alloc(1024*4);
 	pagedir[i]=(unsigned)pagetab;
 	pagetab[0]=0;
-	for (int j=1;j<1024;j++){
-		unsigned *page = mem_alloc(4*4*1024);
-		pagetab[j]=((unsigned)page & 0xFFFFF000) | permission;
-		ListePagesLibres=add(ListePagesLibres,page);
-		for (int k=0; k<4*1024; k++){
-			page[k]=(unsigned)physical_adress;
-			physical_adress+=1;
-		}
+	unsigned *page = mem_alloc(4*4*1024);
+	pagetab[1]=((unsigned)page & 0xFFFFF000) | permission;
+	ListePagesLibres=add(ListePagesLibres,page);
+	for (int k=0; k<4*1024; k++){
+		page[k]=(unsigned)physical_adress;
+		physical_adress+=1;
 	}
 
 	/*gestion de la pile, une seule page table est allouée, cela represente 1000 pages de 4ko */
 	/*physical adress est ici le sommet de notre pile */
-	i+=4*1024;
+	i+=1;
 	unsigned *pilePageTab=mem_alloc(1024*4);
 	unsigned *pilePage=mem_alloc(4*4*1024);
 	pilePageTab[0]=0;
-	pilePageTab[1]=(unsigned)pilePageTab;
+	pilePageTab[1]=(unsigned)pilePage;
 	ListePagesLibres=add(ListePagesLibres,pilePage);
 	for (int k=(4*1024)-1; k>=0; k--){
 		pilePage[k]=(unsigned)physical_adress;
 		physical_adress+=1;
 	}
+	return pilePage;
 
 }
