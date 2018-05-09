@@ -17,7 +17,6 @@
 #include "errno.h"
 
 
-
 Liste jobs;
 
 void terminate(char *line) {
@@ -30,7 +29,7 @@ void terminate(char *line) {
 
 void entete(void) {
 	int i;
-	printf("\n\n\n");
+	printf("\n\n");
 	printf("     ");
 	for (i=0; i<=69; i++) {
 		printf("*");
@@ -57,8 +56,9 @@ void entete(void) {
 	for (i=0; i<=69; i++) {
 		printf("*");
 	}
-	printf("\n\n");
-	printf("Bienvenue dans notre Shell !\n\n");
+	printf("\n             A. BAUMANN - B. BOUILHAC - T. DAVID - B. EL MEJJATI -\n");
+	printf("                    M.H. OTHMAN - E. SINITAMBIRIVOUTIN\n\n");
+  printf("              Bienvenue dans notre systeme d'exploitation s'OS !\n\n");
 }
 
 int shell(void *arg) {
