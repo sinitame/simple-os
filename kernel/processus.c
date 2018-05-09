@@ -19,6 +19,13 @@ free_list* ListePagesLibres= NULL;
 
 
 
+#include "listchainee.h"
+
+extern void ctx_sw(int*,int*);
+extern int read_eax();
+extern Liste jobs;
+
+
 void init_idle(void){
 
 	/* Initialisation de la table et de la file des processus
@@ -113,8 +120,23 @@ void init(int pid, const char* nom, unsigned long ssize,int prio, int (*processu
 		tmp->suiv = P;
 		P->prec = tmp;
 	}
-	//processus_actif->child=P;
-	//P->prec=NULL;
+
+	// processus_actif->child=P;
+	// P->prec=NULL;
+
+
+	if (!strcmp(P->pere->nom,"shell")){
+		Liste tmp = jobs;
+		while (tmp != NULL){
+			if (tmp->pid == P->pid){
+				tmp->time_start =  temps * 20;
+				break;
+			}
+			tmp = tmp->suiv;
+		}
+	}
+
+
 	// si la prio du processus cree est superieure a celle du processus actif
 	if (prio > processus_actif->prio) {
 		ordonnancement();
@@ -125,6 +147,9 @@ int start(int(*code)(void*), unsigned long ssize, int prio, const char * nom, vo
 	if (ssize < (unsigned long)(1<<31)) {
 		for (int futur_pid=0; futur_pid<NBPROC; futur_pid++){
 			if (table_processus[futur_pid] == NULL){
+				char *name=mem_alloc(sizeof(char));
+				strcpy(name, nom);
+				jobs = ajoutQueue(jobs,futur_pid,name,0);
 				init(futur_pid,nom,STACK_KERNEL,prio,code, arg);
 				return futur_pid;
 			}
@@ -225,6 +250,17 @@ void cleaner(Processus *p, int retval) {
 	if (p->pere != NULL){
 		p->etat = zombie;
 		p->retval = retval;
+
+		if (!strcmp(p->pere->nom,"shell")){
+			Liste tmp = jobs;
+			while (tmp != NULL){
+				if (tmp->pid == p->pid){
+					tmp->time_finish = temps * 20;
+					break;
+				}
+				tmp = tmp->suiv;
+			}
+		}
 	} else {
 		p->etat=mort;
 	}
@@ -374,7 +410,7 @@ char* mon_nom(void){
 }
 
 void wait_clock(uint32_t nbr_secs){
-	processus_actif->reveil += nbr_secs;
+	processus_actif->reveil =sec + nbr_secs;
 	processus_actif->etat = endormi;
 	ordonnancement();
 }
