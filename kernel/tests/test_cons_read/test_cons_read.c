@@ -2,7 +2,7 @@
 #include "kbd.h"
 
 
-void test(void *arg)
+void test_cons_read(void *arg)
 {
   (void)arg;
   printf("Cons_read attends 4 caractères pour l'affichage.\n\

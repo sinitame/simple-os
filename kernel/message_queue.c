@@ -152,7 +152,7 @@ int preceive(int fid,int *message) {
   queue_del(msg, chaine);
   if (message!=NULL) {
     *message=msg->val;
-    printf("message recu : %d\n", msg->val);
+    // printf("message recu : %d\n", msg->val);
   }
   mem_free(msg, sizeof(File_priorite));
   //On décrément le nombre de messages dans la file
@@ -160,7 +160,7 @@ int preceive(int fid,int *message) {
   update_list(fid, &tab_message_queues[fid]->blocked_producers, 1);
   //s'il existe des processus producteurs bloqués
   if (!queue_empty(&tab_message_queues[fid]->blocked_producers)) {
-    printf("liste des producteus blockés\n");
+    // printf("liste des producteus blockés\n");
     print_list(&tab_message_queues[fid]->blocked_producers);
     //On récupére le processus bloqué le plus prioritaire
     File_priorite *proc;
@@ -255,7 +255,7 @@ int psend(int fid, int message){
   File_priorite *nv_msg;
   nv_msg=mem_alloc(sizeof(File_priorite));
   nv_msg->val=message;
-  printf("message ecrit : %d \n", nv_msg->val);
+  // printf("message ecrit : %d \n", nv_msg->val);
   if (queue_empty(&tab_message_queues[fid]->messages)!=0) {
     nv_msg->prio=0;
   }
@@ -267,12 +267,12 @@ int psend(int fid, int message){
   queue_add(nv_msg, &(tab_message_queues[fid]->messages), File_priorite, chaine, prio);
   //incrément du nombre de messages dans la file
   tab_message_queues[fid]->nb_msg++;
-  printf("liste des consomatteurs blockés\n");
+  // printf("liste des consomatteurs blockés\n");
   print_list(&tab_message_queues[fid]->blocked_consumers);
   update_list(fid, &tab_message_queues[fid]->blocked_consumers, 0);
   //s'il existe des processus consomatteurs bloqués
   if (tab_message_queues[fid]->nb_b_c!=0) {
-    printf("liste des consomatteurs blockés\n");
+    // printf("liste des consomatteurs blockés\n");
     print_list(&tab_message_queues[fid]->blocked_consumers);
     //On récupére le processus bloqué le plus prioritaire
     File_priorite *proc;
@@ -289,7 +289,7 @@ int psend(int fid, int message){
 int update_list(int fid, link *head, int p) {
   File_priorite *proc_courant = mem_alloc(sizeof(File_priorite));
   int nb;
-  if (p==1) { 
+  if (p==1) {
     nb = tab_message_queues[fid]->nb_b_p;
   }
   else {

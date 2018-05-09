@@ -2,6 +2,11 @@
 #include "stdio.h"
 #include "stddef.h"
 
+/*
+Test de la survie d'un fils a son pere
+killer tue father mais child2 n'etait pas zombie
+*/
+
 int child1(void * args) {
 	(void)args;
 	printf(" 2");
@@ -10,6 +15,7 @@ int child1(void * args) {
 
 int child2(void *args) {
 	(void) args;
+	printf(" 6");
 	return 0;
 }
 
@@ -34,6 +40,8 @@ int killer(void *args)
 		printf(" 5");
 		// killer tue father qui a deux fils : child1 (zombie car il s'est execute) et child2 (encore activable)
 		kill(pid1);
-		printf(" 6.\n");
+		// change de prio pour passer la main a child2
+		chprio(getpid(), 30);
+		printf(" 7.\n");
 		return 0;
 }
