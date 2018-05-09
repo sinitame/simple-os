@@ -160,6 +160,7 @@ void context_switch(Processus *prochain) {
 void ordonnancement(void){
 	Processus* prochain;
 	Processus* top;
+	//printf("%d",processus_actif->pid);
 
 	if (!queue_empty(&file_processus)) {
 		// parcours de la file dans le sens des prio DECROISSANTE donc queue_for_each_prev

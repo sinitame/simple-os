@@ -13,6 +13,7 @@
 #define UCHAR_MAX 255U
 
 
+
 /*
  * memccpy.c
  *

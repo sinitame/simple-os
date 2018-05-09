@@ -25,5 +25,7 @@ soit les semaphores
 #include "test15.h"
 
 #include "test_manage_child.h"
+#include "test_cons_read.h"
 
-#endif 
+
+#endif
