@@ -5,6 +5,7 @@
 #include <string.h>
 #include "../shared/malloc.c"
 #include "boot/early_mm.h"
+#include "userspace_apps.h"
 
 extern void ctx_sw(int*,int*);
 extern int read_eax();
@@ -64,7 +65,7 @@ void init(int pid, const char* nom, unsigned long ssize,int prio, int (*processu
 	P->reveil = 0;
   	P->pgdir =  mem_alloc(1024*4);
 	/*a completer */
-	proc_mapping(P->pgdir, virtual_adress, physical_adress, permission);
+	proc_mapping(P->pgdir, virtual_adress, physical_adress, PAGE_TABLE_RW);
 	P->pgtab =  mem_alloc(1024*4);
 
 
@@ -365,7 +366,8 @@ hash_t* create_hash() {
 }
 
 void proc_mapping(unsigned *pagedir, unsigned virtual_adress, unsigned physical_adress, unsigned permission){
-	//commence par copier les adresses du kernel au début du nouveau page directory
+	//commence par copier les adresses du kernel au début du nouveau page directoryœ
+	//Chaque page créée est ajoutée à la liste des pages libres
 	for(int i=0; i<64;i++){
 		pagedir[i] = pgdir[i];
 	}
@@ -389,14 +391,15 @@ void proc_mapping(unsigned *pagedir, unsigned virtual_adress, unsigned physical_
 		}
 	}
 
-	/*gestion de la pile */
-	i+=1;
+	/*gestion de la pile, une seule page table est allouée, cela represente 1000 pages de 4ko */
+	/*physical adress est ici le sommet de notre pile */
+	i+=4*1024;
 	unsigned *pilePageTab=mem_alloc(1024*4);
 	unsigned *pilePage=mem_alloc(4*4*1024);
 	pilePageTab[0]=0;
 	pilePageTab[1]=(unsigned)pilePageTab;
 	ListePagesLibres=add(ListePagesLibres,pilePage);
-	for (int k=0; k<4*1024; k++){
+	for (int k=(4*1024)-1; k>=0; k--){
 		pilePage[k]=(unsigned)physical_adress;
 		physical_adress+=1;
 	}
