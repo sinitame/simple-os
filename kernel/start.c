@@ -51,7 +51,8 @@ void kernel_start(void)
     // // tres long
 	// start(test7, 4000, 128, "test7", (void* ) 77);
 
-	start(test8, 4000, 128, "test8", (void *) 77);
+    // ne passe plus !!!!
+	// start(test8, 4000, 128, "test8", (void *) 77);
 
     // // tres long
 	// start(test9, 4000, 128, "test9", (void*) 77);

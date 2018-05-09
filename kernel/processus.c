@@ -74,14 +74,14 @@ void init(int pid, const char* nom, unsigned long ssize,int prio, int (*processu
 	P->reveil = 0;
   	P->pgdir =  mem_alloc(1024*4);
 	/*a completer */
-	hash_t *h = create_hash();
+	// hash_t *h = create_hash();
 	char *name = mem_alloc(sizeof(char));
 	strcpy(name, nom);
-	unsigned *p_physical_adress = hash_get(h, name, 0);
-	unsigned physical_adress = (unsigned) p_physical_adress;
-	unsigned virtual_adress = physical_adress << shift;
+	// unsigned *p_physical_adress = hash_get(h, name, 0);
+	// unsigned physical_adress = (unsigned) p_physical_adress;
+	// unsigned virtual_adress = physical_adress << shift;
 	shift=shift+1;
-	P->pile=proc_mapping(P->pgdir, virtual_adress, physical_adress, PAGE_TABLE_RW);
+	// P->pile=proc_mapping(P->pgdir, virtual_adress, physical_adress, PAGE_TABLE_RW);
 	P->pile[ssize-3] = (uint32_t)processus;
 	P->pile[ssize-2] = (uint32_t)exit;
 	P->pile[ssize-1] = (uint32_t)arg;
