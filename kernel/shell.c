@@ -54,7 +54,7 @@ int shell(void *arg) {
 			/* parsecmd xfree line and set it up to 0 */
 			l = parsecmd( & line);
 
-			printf("Commade:'%s', args: '%s', rin: %s, rout: '%s' \n", l->seq[0][0],l->seq[0][1],l->in,l->out);
+			//printf("Commade:'%s', args: '%s', rin: %s, rout: '%s' \n", l->seq[0][0],l->seq[0][1],l->in,l->out);
 
 /*
 			// If input stream closed, normal termination
@@ -70,9 +70,10 @@ int shell(void *arg) {
 				printf("error: %s\n", l->err);
 				continue;
 			}*/
-
-
- 		int pid = create_process(l->seq[0]);
+			int pid;
+			if (l!=NULL) {
+ 				pid = create_process(l->seq[0]);
+			}
 
 	/*int statut;
 
