@@ -57,9 +57,11 @@ LDFLAGS := -melf_i386
 # Import facilities
 include build/utils.mk
 
+TESTS_DIR := $(wildcard tests/test[^s]*)
+
 ### Compilation sources ###
 # Use DIRS variable to add source sub-directories
-DIRS := . boot
+DIRS := . boot $(TESTS_DIR)
 SRC  :=	\
 	$(call all-asm-files-under, $(DIRS)) \
 	$(call all-c-files-under , $(DIRS))
@@ -146,4 +148,3 @@ $(OUTPUT):
 .PHONY: clean
 clean:
 	rm -rf $(OUTPUT) kernel.bin
-

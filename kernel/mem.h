@@ -7,8 +7,13 @@
  */
 #ifndef __MEM_H__
 #define __MEM_H__
-
+#include <stddef.h>
+#include <string.h>
 void *mem_alloc(unsigned long length);
 void mem_free(void *zone, unsigned long length);
+void mem_free_nolength(void *zone);
+void *xrealloc(void *ptr, size_t size);
+void xfree(void *zone);
+
 
 #endif
