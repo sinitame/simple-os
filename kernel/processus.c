@@ -103,6 +103,7 @@ void init(int pid, const char* nom, unsigned long ssize,int prio, int (*processu
 	if (processus_actif->child == NULL) {
 		P->prec = NULL;
 		processus_actif->child = P;
+
 	}
 	else {
 		Processus *tmp = processus_actif->child;

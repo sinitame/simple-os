@@ -25,12 +25,13 @@ Les tests 10 et 11 utilisent les semaphores
 #include "test15/test15.h"
 #include "test16/test16.h"
 #include "test17/test17.h"
-#include "test18/test18.h"
+// #include "test18/test18.h"
 // #include "test19/test19.h"
 // #include "test20/test20.h"
-#include "test21/test21.h"
-#include "test22/test22.h"
+// #include "test21/test21.h"
+// #include "test22/test22.h"
 
 #include "test_manage_child.h"
+
 
 #endif
