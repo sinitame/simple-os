@@ -15,7 +15,7 @@
 #include "shell.h"
 #include "commandes_shell.h"
 #include "errno.h"
-
+#include "../shared/console.h"
 
 Liste jobs;
 
@@ -23,7 +23,7 @@ void terminate(char *line) {
 
 	if (line)
 	  xfree(line);
-	printf("exit\n");
+	printf("Au revoir !\n");
 	exit(0);
 }
 
@@ -59,6 +59,7 @@ void entete(void) {
 	printf("\n             A. BAUMANN - B. BOUILHAC - T. DAVID - B. EL MEJJATI -\n");
 	printf("                    M.H. OTHMAN - E. SINITAMBIRIVOUTIN\n\n");
   printf("              Bienvenue dans notre systeme d'exploitation s'OS !\n\n");
+	printf("Tapez la commande 'help' pour afficher la liste des commandes disponibles.\n\n");
 }
 
 int shell(void *arg) {
@@ -73,7 +74,7 @@ int shell(void *arg) {
 		struct cmdline *l;
 		char *line=0;
 		//int i, j;
-		char *prompt = "shell> ";
+		char *prompt = "s'OShell> ";
 		/* Readline use some internal memory structure that
 		   	can not be cleaned at the end of the program. Thus
 		   	one memory leak per command seems unavoidable yet */
@@ -107,15 +108,25 @@ int shell(void *arg) {
 			int pid;
 			int statut;
 			if (l!=NULL) {
- 				pid = create_process(l->seq[0]);
-				jobs = supprimerElementsFinis(jobs);
+				if (!strcmp(*(l->seq[0]),"exit")) {
+					terminate(line);
 
-				if (!(l->bg)){
-					if (pid > -1){
-						while(waitpid(pid,&statut) != pid);
-						sti();
+				} else if (!strcmp(*(l->seq[0]),"header")) {
+					efface_ecran();
+					entete();
+
+				} else {
+					pid = create_process(l->seq[0]);
+					jobs = supprimerElementsFinis(jobs);
+
+					if (!(l->bg)){
+						if (pid > -1){
+							while(waitpid(pid,&statut) != pid);
+							sti();
+						}
 					}
 				}
+
 			}
 
 

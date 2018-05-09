@@ -98,7 +98,7 @@ unsigned long cons_read(char *string, unsigned long length)
               printf("\b");
               printf(" ");
               printf("\b");
-          
+
           }
           break;
         default :
@@ -139,12 +139,7 @@ void keyboard_data(char *str){
         traite_car(str[i]);
       }
         add_buff(&stdin, str[i]);
-    }
-
-
-
-
-
+      }
 }
 
 void tic_CLAVIER(void){
